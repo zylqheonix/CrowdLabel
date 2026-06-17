@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+
+{% block title %}Tasks · CrowdLabel{% endblock %}
+
+{% block content %}
+    {% if finished %}
+        <h1>You've completed all tasks</h1>
+        <p class="lead">Thanks for labeling. There are no more questions right now.</p>
+        <a class="btn" href="{% url 'tasks' %}?q=0">Start Over</a>
+    {% else %}
+        <h1>Label this image</h1>
+
+        <img class="task-image" src="{{ question.image }}" alt="Task image">
+
+        <p class="question-text">{{ question.text }}</p>
+
+        <form method="post" action="{% url 'tasks' %}">
+            {% csrf_token %}
+            <input type="hidden" name="index" value="{{ index }}">
+
+            <fieldset class="options" {% if answered %}disabled{% endif %}>
+                {% for option in question.options %}
+                    <label class="option
+                        {% if answered and option == question.correct %} option-correct{% endif %}
+                        {% if answered and option == selected and not is_correct %} option-wrong{% endif %}">
+                        <input type="radio" name="answer" value="{{ option }}"
+                            {% if option == selected %}checked{% endif %}>
+                        <span>{{ option }}</span>
+                    </label>
+                {% endfor %}
+            </fieldset>
+
+            {% if not answered %}
+                <button class="btn" type="submit">Submit</button>
+            {% endif %}
+        </form>
+
+        {% if answered %}
+            {% if is_correct %}
+                <p class="feedback feedback-correct">Correct!</p>
+            {% else %}
+                <p class="feedback feedback-wrong">Incorrect — the answer was {{ question.correct }}</p>
+            {% endif %}
+
+            {% if has_next %}
+                <a class="btn" href="{% url 'tasks' %}?q={{ next_index }}">Next Question</a>
+            {% else %}
+                <a class="btn" href="{% url 'tasks' %}?q={{ next_index }}">Finish</a>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endblock %}

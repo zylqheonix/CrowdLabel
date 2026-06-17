@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+
+{% block title %}Dashboard · CrowdLabel{% endblock %}
+
+{% block content %}
+    <h1>Admin Dashboard</h1>
+    <p class="lead">Workers ranked by accuracy. Refresh to see the latest results.</p>
+
+    {% if rows %}
+        <table class="scores">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Correct</th>
+                    <th>Attempted</th>
+                    <th>Accuracy</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.username }}</td>
+                        <td>{{ row.correct }}</td>
+                        <td>{{ row.attempted }}</td>
+                        <td>{{ row.accuracy_pct }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No workers registered yet.</p>
+    {% endif %}
+{% endblock %}

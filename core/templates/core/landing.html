@@ -1,0 +1,10 @@
+{% extends "core/base.html" %}
+
+{% block title %}CrowdLabel{% endblock %}
+
+{% block content %}
+    <h1>CrowdLabel</h1>
+    <p class="lead">A crowd-labeling platform for turning raw data into clean, labeled datasets.</p>
+    <a class="btn" href="{% url 'login' %}">Log In</a>
+    <a class="btn btn-secondary" href="{% url 'register' %}">Register</a>
+{% endblock %}
