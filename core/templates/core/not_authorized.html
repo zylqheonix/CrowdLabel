@@ -1,9 +1,10 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 
-{% block title %}Not authorized · CrowdLabel{% endblock %}
+{% block title %}{% trans "Not authorized" %} · {% trans "CrowdLabel" %}{% endblock %}
 
 {% block content %}
-    <h1>Not authorized</h1>
-    <p class="lead">You don't have permission to view this page.</p>
-    <a class="btn" href="{% url 'tasks' %}">Go to your tasks</a>
+    <h1>{% trans "Not authorized" %}</h1>
+    <p class="lead">{% trans "You don't have permission to view this page." %}</p>
+    <a class="btn" href="{% url 'tasks' %}">{% trans "Go to your tasks" %}</a>
 {% endblock %}

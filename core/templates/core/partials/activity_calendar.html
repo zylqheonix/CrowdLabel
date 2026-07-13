@@ -1,0 +1,36 @@
+{% load i18n %}
+<div class="activity-head">
+    <div class="activity-title-wrap">
+        <h2 class="card-title activity-title">{% trans "Activity" %}</h2>
+        <p class="activity-month-label">{{ activity.month_label }}</p>
+    </div>
+    <div class="activity-nav">
+        <button
+            class="btn btn-small btn-secondary activity-nav-btn{% if not activity.has_prev %} btn-disabled{% endif %}"
+            type="button"
+            aria-label="{% trans 'Previous month' %}"
+            {% if activity.has_prev %}data-month="{{ activity.prev_month }}"{% else %}disabled{% endif %}
+        ><span class="nav-arrow nav-arrow-prev" aria-hidden="true">←</span></button>
+        <button
+            class="btn btn-small btn-secondary activity-nav-btn{% if not activity.has_next %} btn-disabled{% endif %}"
+            type="button"
+            aria-label="{% trans 'Next month' %}"
+            {% if activity.has_next %}data-month="{{ activity.next_month }}"{% else %}disabled{% endif %}
+        ><span class="nav-arrow nav-arrow-next" aria-hidden="true">→</span></button>
+    </div>
+</div>
+<div class="activity-calendar-wrap">
+    <div class="activity-grid">
+        {% for week in activity.weeks %}
+            {% for day in week %}
+                <span
+                    class="activity-cell level-{{ day.level }}{% if not day.in_month %} activity-cell-pad{% endif %}"
+                    title="{{ day.title }}"
+                    {% if day.in_month %}aria-label="{{ day.title }}"{% else %}aria-hidden="true"{% endif %}
+                ></span>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+<p class="activity-caption">{% blocktrans with count=activity.active_days month=activity.month_label %}{{ count }} active days in {{ month }}{% endblocktrans %}</p>
+<p class="activity-history-row"><a class="history-link" href="{% url 'worker_history' %}">{% trans "View answer history" %} <span class="nav-arrow nav-arrow-next" aria-hidden="true">→</span></a></p>

@@ -1,21 +1,81 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}CrowdLabel{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <title>{% block title %}{% trans "CrowdLabel" %}{% endblock %}</title>
+    <script>
+        (function () {
+            const stored = localStorage.getItem("theme");
+            const resolved = stored || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+            document.documentElement.setAttribute("data-theme", resolved);
+        })();
+    </script>
+    <link rel="stylesheet" href="{% static 'core/style.css' %}?v=44">
 </head>
 <body>
-    <main class="card">
-        {% if user.is_authenticated %}
-            <div class="topbar">
-                <span class="topbar-user">{{ user.username }} ({{ user.role }})</span>
-                <a class="topbar-link" href="{% url 'logout' %}">Log out</a>
+    <header class="appbar">
+        <div class="appbar-inner">
+            <a class="brand" href="{% url 'landing' %}">{% trans "CrowdLabel" %}</a>
+            <div class="appbar-right">
+                <form action="{% url 'set_language' %}" method="post" class="lang-switcher">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                    {% get_current_language as CURRENT_LANG %}
+                    <button type="submit" name="language" value="en" class="lang-btn{% if CURRENT_LANG == 'en' %} active{% endif %}" lang="en">EN</button>
+                    <span class="lang-sep" aria-hidden="true">|</span>
+                    <button type="submit" name="language" value="ar" class="lang-btn{% if CURRENT_LANG == 'ar' %} active{% endif %}" lang="ar">عربية</button>
+                </form>
+            {% if user.is_authenticated %}
+                    <span class="appbar-user">{{ user.username }} · {{ user.get_role_display }}</span>
+                    {% if user.role == "worker" %}
+                        <form method="post" action="{% url 'create_invite' %}" class="nav-inline-form">
+                            {% csrf_token %}
+                            <button class="btn btn-small btn-secondary btn-icon" type="submit" aria-label="{% trans 'Invite' %}">⤴</button>
+                        </form>
+                    {% endif %}
+                    {% if user.role == "worker" %}
+                        <a class="btn btn-small btn-secondary" href="{% url 'profile_activity' %}">{% trans "Profile" %}</a>
+                    {% else %}
+                        <a class="btn btn-small btn-secondary" href="{% url 'settings' %}">{% trans "Settings" %}</a>
+                    {% endif %}
+                    <a class="btn btn-small" href="{% url 'logout' %}">{% trans "Log out" %}</a>
+            {% endif %}
             </div>
-        {% endif %}
-        {% block content %}{% endblock %}
-    </main>
+        </div>
+    </header>
+
+    {% if messages %}
+        <div class="flash-wrap">
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block layout %}
+        <main class="shell shell-narrow">
+            <div class="card">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    {% endblock %}
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="{% trans 'Toggle dark mode' %}">
+        <span class="theme-toggle-light" aria-hidden="true">☾</span>
+        <span class="theme-toggle-dark" aria-hidden="true">☀</span>
+    </button>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            const btn = document.getElementById("theme-toggle");
+            if (!btn) return;
+            btn.addEventListener("click", function () {
+                const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+                root.setAttribute("data-theme", next);
+                localStorage.setItem("theme", next);
+            });
+        })();
+    </script>
 </body>
 </html>

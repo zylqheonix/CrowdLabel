@@ -1,0 +1,56 @@
+{% extends "core/profile_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Profile" %} · {% trans "Activity & Reputation" %}{% endblock %}
+
+{% block profile_content %}
+    <section class="reputation-strip reputation-strip-profile">
+        <p class="reputation-score">★ {% blocktrans with score=reputation.score %}{{ score }} reputation{% endblocktrans %}</p>
+        <p class="reputation-meta">{% blocktrans with correct=reputation.correct wrong=reputation.wrong %}{{ correct }} correct · {{ wrong }} wrong{% endblocktrans %}</p>
+    </section>
+
+    <section class="card activity-section profile-activity-card" aria-label="{% trans 'Answer activity' %}">
+        <div id="activity-content" data-endpoint="{% url 'worker_activity_month' %}">
+            {% include "core/partials/activity_calendar.html" %}
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const activityContent = document.getElementById("activity-content");
+            const endpoint = activityContent ? activityContent.dataset.endpoint : null;
+            if (!activityContent || !endpoint) {
+                return;
+            }
+
+            activityContent.addEventListener("click", async function (event) {
+                const button = event.target.closest(".activity-nav-btn[data-month]");
+                if (!button) {
+                    return;
+                }
+                const month = button.dataset.month;
+                if (!month) {
+                    return;
+                }
+                button.disabled = true;
+                try {
+                    const response = await fetch(`${endpoint}?month=${encodeURIComponent(month)}`, {
+                        headers: { "X-Requested-With": "XMLHttpRequest" },
+                    });
+                    if (!response.ok) {
+                        throw new Error("Activity month request failed");
+                    }
+                    const payload = await response.json();
+                    activityContent.innerHTML = payload.html;
+                    if (payload.month) {
+                        const current = new URL(window.location.href);
+                        current.searchParams.set("month", payload.month);
+                        window.history.replaceState({}, "", current.toString());
+                    }
+                } catch (error) {
+                    window.location.href = `{% url 'profile_activity' %}?month=${encodeURIComponent(month)}`;
+                }
+            });
+        });
+    </script>
+{% endblock %}

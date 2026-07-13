@@ -1,0 +1,57 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Upload Tasks" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block content %}
+    <h1>{% trans "Upload Tasks" %}</h1>
+    <p class="lead">{% trans "Upload a CSV of tasks. Rows with an existing task ID are updated, not duplicated." %}</p>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if result %}
+        <p class="feedback feedback-correct">
+            {% blocktrans with imported=result.created|add:result.updated created=result.created updated=result.updated failed=result.errors|length %}
+                {{ imported }} imported ({{ created }} created, {{ updated }} updated) · {{ failed }} skipped
+            {% endblocktrans %}
+        </p>
+        {% if result.errors %}
+            <h2 class="card-title">{% trans "Rows that failed" %}</h2>
+            <table class="scores">
+                <thead>
+                    <tr><th>{% trans "Row" %}</th><th>{% trans "Reason" %}</th></tr>
+                </thead>
+                <tbody>
+                    {% for e in result.errors %}
+                        <tr><td>{{ e.row }}</td><td>{{ e.reason }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    {% endif %}
+
+    <form method="post" action="{% url 'upload_tasks' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="project">{% trans "Project" %}</label>
+        <select class="select" id="project" name="project" required>
+            <option value="">{% trans "Choose a project…" %}</option>
+            {% for project in projects %}
+                <option value="{{ project.id }}" {% if selected_project == project.id|stringformat:"s" %}selected{% endif %}>
+                    {{ project.name }}{% if project.customer %} — {{ project.customer }}{% endif %}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="csv_file">{% trans "CSV file" %}</label>
+        <input type="file" id="csv_file" name="csv_file" accept=".csv">
+        <button class="btn" type="submit">{% trans "Upload" %}</button>
+    </form>
+
+    {% if columns %}
+        <p class="hint">{% blocktrans with cols=columns|join:", " %}Expected columns: {{ cols }}{% endblocktrans %}</p>
+    {% endif %}
+
+    <p class="alt-link"><a href="{% url 'dashboard' %}">{% trans "Back to Dashboard" %}</a></p>
+{% endblock %}

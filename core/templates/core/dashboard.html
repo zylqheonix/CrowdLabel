@@ -1,35 +1,100 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 
-{% block title %}Dashboard · CrowdLabel{% endblock %}
+{% block title %}{% trans "Dashboard" %} · {% trans "CrowdLabel" %}{% endblock %}
 
-{% block content %}
-    <h1>Admin Dashboard</h1>
-    <p class="lead">Workers ranked by accuracy. Refresh to see the latest results.</p>
+{% block layout %}
+<main class="shell shell-wide">
+    {% include "core/partials/admin_deadline_banner.html" %}
+    {% include "core/partials/admin_pending_setup_banner.html" %}
+    <div class="page-head">
+        <div>
+            <h1>{% trans "Admin Dashboard" %}</h1>
+            <p class="lead">{% trans "Overview of tasks and worker performance." %}</p>
+        </div>
+        <div class="page-actions-cluster">
+            <a class="btn btn-secondary" href="{% url 'projects' %}">{% trans "Projects" %}</a>
+            <a class="btn btn-secondary" href="{% url 'question_distribution' %}">{% trans "Distribution" %}</a>
+            <a class="btn btn-secondary" href="{% url 'review_queue' %}">Review Queue</a>
+            <a class="btn" href="{% url 'analytics' %}">{% trans "Analytics" %}</a>
+        </div>
+    </div>
 
-    {% if rows %}
-        <table class="scores">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Username</th>
-                    <th>Correct</th>
-                    <th>Attempted</th>
-                    <th>Accuracy</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in rows %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ row.username }}</td>
-                        <td>{{ row.correct }}</td>
-                        <td>{{ row.attempted }}</td>
-                        <td>{{ row.accuracy_pct }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No workers registered yet.</p>
-    {% endif %}
+    <div class="dash-grid">
+        <section class="card">
+            <h2 class="card-title">{% trans "Projects Overview" %}</h2>
+
+            <div class="stat-row">
+                <div class="stat">
+                    <span class="stat-value">{{ total_tasks }}</span>
+                    <span class="stat-label">{% trans "Total tasks" %}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ active_projects }}</span>
+                    <span class="stat-label">{% trans "Active projects" %}</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                {# Placeholder: model selection is not wired to anything yet. #}
+                <label class="control-label" for="llm-model">{% trans "AI model" %}</label>
+                <select class="select" id="llm-model">
+                    <option>GPT-4</option>
+                    <option>Claude</option>
+                    <option>Llama 3</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <a class="btn" href="{% url 'upload_tasks' %}">{% trans "Upload Tasks" %}</a>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="card-title">{% trans "Project Progress" %}</h2>
+
+            {% if project_rows %}
+                <table class="scores">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Project" %}</th>
+                            <th>{% trans "Customer" %}</th>
+                            <th>{% trans "Deadline" %}</th>
+                            <th>{% trans "Progress" %}</th>
+                            <th>{% trans "Completed / Total" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in project_rows %}
+                            <tr>
+                                <td>{{ project.name }}</td>
+                                <td>{{ project.customer|default:"—" }}</td>
+                                <td>
+                                    {% if project.deadline %}
+                                        {{ project.deadline|date:"d/m/Y" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="project-progress-wrap">
+                                        <div class="project-progress-track">
+                                            <span class="project-progress-fill" style="width: {{ project.progress_pct }}%"></span>
+                                        </div>
+                                        <span class="project-progress-pct">{{ project.progress_pct }}%</span>
+                                    </div>
+                                </td>
+                                <td>{{ project.completed_count }} / {{ project.task_count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>{% trans "No projects yet." %}</p>
+            {% endif %}
+        </section>
+    </div>
+
+    {% include "core/partials/review_queue_panel.html" %}
+</main>
 {% endblock %}

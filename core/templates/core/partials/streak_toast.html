@@ -1,0 +1,75 @@
+{% load i18n %}
+{% if streak_toast %}
+    <div
+        class="streak-toast"
+        id="streak-toast"
+        data-from="{{ streak_toast.previous }}"
+        data-to="{{ streak_toast.current }}"
+        role="status"
+    >
+        <button class="toast-close" type="button" aria-label="{% trans 'Dismiss streak notification' %}">&times;</button>
+        <p class="toast-heading">{% trans "Daily streak" %}</p>
+        <div class="streak-toast-main">
+            <span class="streak-toast-fire" aria-hidden="true">🔥</span>
+            <div class="slot-machine">
+                <div class="slot-window">
+                    <div class="slot-strip"></div>
+                </div>
+            </div>
+        </div>
+        {% if streak_toast.earned_freeze %}
+            <p class="streak-toast-sub">🛡️ {% trans "Streak protection unlocked" %}</p>
+        {% endif %}
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toast = document.getElementById("streak-toast");
+            if (!toast) {
+                return;
+            }
+
+            const from = parseInt(toast.dataset.from, 10) || 0;
+            const to = parseInt(toast.dataset.to, 10) || 0;
+            const strip = toast.querySelector(".slot-strip");
+            const digitHeight = 44;
+            const numbers = [];
+            const poolMax = Math.max(to + 8, 12);
+
+            for (let i = 0; i < 10; i += 1) {
+                numbers.push(Math.floor(Math.random() * poolMax) + 1);
+            }
+            numbers.push(from);
+            for (let i = 0; i < 4; i += 1) {
+                numbers.push(Math.floor(Math.random() * poolMax) + 1);
+            }
+            numbers.push(to);
+
+            strip.style.setProperty("--slot-digit-height", digitHeight + "px");
+            strip.innerHTML = numbers
+                .map(function (value) {
+                    return '<span class="slot-digit">' + value + "</span>";
+                })
+                .join("");
+
+            requestAnimationFrame(function () {
+                strip.classList.add("slot-spin");
+                strip.style.transform =
+                    "translateY(-" + (numbers.length - 1) * digitHeight + "px)";
+            });
+
+            const close = toast.querySelector(".toast-close");
+            if (close) {
+                close.addEventListener("click", function () {
+                    toast.remove();
+                });
+            }
+
+            window.setTimeout(function () {
+                toast.classList.add("streak-toast-hide");
+                window.setTimeout(function () {
+                    toast.remove();
+                }, 350);
+            }, 4800);
+        });
+    </script>
+{% endif %}

@@ -1,9 +1,10 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 
-{% block title %}Register · CrowdLabel{% endblock %}
+{% block title %}{% trans "Register" %} · {% trans "CrowdLabel" %}{% endblock %}
 
 {% block content %}
-    <h1>Create an account</h1>
+    <h1>{% trans "Create an account" %}</h1>
 
     {% if error %}
         <p class="error">{{ error }}</p>
@@ -11,14 +12,36 @@
 
     <form method="post" action="{% url 'register' %}">
         {% csrf_token %}
-        <label for="username">Username</label>
+        <input type="hidden" name="invite_token" value="{{ invite_token|default:'' }}">
+
+        <fieldset class="register-role-fieldset">
+            <legend class="control-label">{% trans "I am registering as" %}</legend>
+            <div class="register-role-options">
+                <label class="register-role-option{% if selected_role == "worker" %} is-active{% endif %}">
+                    <input type="radio" name="role" value="worker"{% if selected_role == "worker" %} checked{% endif %}>
+                    <span class="register-role-label">{% trans "Worker" %}</span>
+                    <span class="register-role-hint">{% trans "Answer labeling tasks and earn points." %}</span>
+                </label>
+                <label class="register-role-option{% if selected_role == "customer" %} is-active{% endif %}">
+                    <input type="radio" name="role" value="customer"{% if selected_role == "customer" %} checked{% endif %}>
+                    <span class="register-role-label">{% trans "Customer" %}</span>
+                    <span class="register-role-hint">{% trans "Upload projects for admin review." %}</span>
+                </label>
+            </div>
+        </fieldset>
+
+        <label for="username">{% trans "Username" %}</label>
         <input type="text" id="username" name="username" autofocus>
 
-        <label for="password">Password</label>
+        <label for="email">{% trans "Email" %}</label>
+        <input type="email" id="email" name="email" value="{{ email_value|default:'' }}" required>
+        <p class="hint">{% trans "One account per email. Used for recovery and login verification." %}</p>
+
+        <label for="password">{% trans "Password" %}</label>
         <input type="password" id="password" name="password">
 
-        <button class="btn" type="submit">Register</button>
+        <button class="btn" type="submit">{% trans "Register" %}</button>
     </form>
 
-    <p class="alt-link">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+    <p class="alt-link">{% trans "Already have an account?" %} <a href="{% url 'login' %}">{% trans "Log in" %}</a></p>
 {% endblock %}

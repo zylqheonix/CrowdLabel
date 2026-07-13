@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Upload Project" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-narrow">
+    <div class="page-head">
+        <div>
+            <h1>{% trans "Upload project" %}</h1>
+            <p class="lead">{% trans "Submit a project and task CSV for admin review. Tasks stay hidden from workers until activated." %}</p>
+        </div>
+        <div class="page-actions-cluster">
+            <a class="btn btn-secondary" href="{% url 'customer_dashboard' %}">{% trans "Back" %}</a>
+        </div>
+    </div>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <section class="card">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="name">{% trans "Project name" %}</label>
+            <input id="name" name="name" type="text" required value="{{ name|default:'' }}">
+
+            <label for="deadline">{% trans "Proposed deadline" %}</label>
+            <input id="deadline" name="deadline" type="date" required value="{{ deadline|default:'' }}">
+
+            <label for="csv_file">{% trans "Task CSV" %}</label>
+            <input id="csv_file" name="csv_file" type="file" accept=".csv,text/csv" required>
+
+            <p class="hint">{% trans "Expected columns (system columns are ignored):" %}</p>
+            <p class="hint mono-hint">{{ columns|join:", " }}</p>
+
+            <button class="btn" type="submit">{% trans "Submit for review" %}</button>
+        </form>
+    </section>
+
+    {% if import_errors %}
+        <section class="card">
+            <h2 class="card-title">{% trans "Import errors" %}</h2>
+            <ul>
+                {% for err in import_errors %}
+                    <li>{% blocktrans with row=err.row reason=err.reason %}Row {{ row }}: {{ reason }}{% endblocktrans %}</li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+</main>
+{% endblock %}

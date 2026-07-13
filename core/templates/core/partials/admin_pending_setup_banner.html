@@ -1,0 +1,32 @@
+{% load i18n %}
+{% if pending_setup_projects %}
+    <section class="admin-setup-banner-wrap" aria-live="polite">
+        <div class="admin-setup-banner">
+            <div class="admin-setup-title">{% trans "Customer projects need setup" %}</div>
+            <p class="admin-setup-lead">
+                {% blocktrans count count=pending_setup_count %}
+                    {{ count }} uploaded project is waiting for review and activation.
+                {% plural %}
+                    {{ count }} uploaded projects are waiting for review and activation.
+                {% endblocktrans %}
+            </p>
+            <div class="admin-setup-items">
+                {% for p in pending_setup_projects %}
+                    <div class="admin-setup-item">
+                        <div class="admin-setup-left">
+                            <strong class="admin-setup-name">{{ p.name }}</strong>
+                            <span class="admin-setup-meta">
+                                {% if p.owner %}{{ p.owner.username }}{% else %}{{ p.customer|default:"—" }}{% endif %}
+                                · {{ p.task_count }} {% trans "tasks" %}
+                                {% if p.deadline %}· {% trans "Deadline" %} {{ p.deadline|date:"d/m/Y" }}{% endif %}
+                            </span>
+                        </div>
+                        <div class="admin-setup-right">
+                            <a class="btn btn-small" href="{% url 'project_edit' p.id %}">{% trans "Review & activate" %}</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}

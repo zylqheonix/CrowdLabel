@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Profile" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide worker-page">
+{% block content %}
+    <header class="page-action-row">
+        <div class="page-intro">
+            <h1>{% trans "Profile" %}</h1>
+            <p class="lead">{% trans "View your activity, security, and wallet details." %}</p>
+        </div>
+        <a class="btn btn-secondary" href="{% url 'worker_dashboard' %}"><span class="nav-arrow nav-arrow-prev" aria-hidden="true">←</span> {% trans "Back to Dashboard" %}</a>
+    </header>
+
+    <section class="profile-layout">
+        <aside class="card profile-sidebar" aria-label="{% trans 'Profile sections' %}">
+            <a class="profile-nav-item {% if profile_tab == 'activity' %}active{% endif %}" href="{% url 'profile_activity' %}">
+                {% trans "Activity & Reputation" %}
+            </a>
+            <a class="profile-nav-item {% if profile_tab == 'preferences' %}active{% endif %}" href="{% url 'profile_preferences' %}">
+                {% trans "Preferences" %}
+            </a>
+            <a class="profile-nav-item {% if profile_tab == 'security' %}active{% endif %}" href="{% url 'profile_security' %}">
+                {% trans "Security" %}
+            </a>
+            <a class="profile-nav-item {% if profile_tab == 'wallet' %}active{% endif %}" href="{% url 'profile_wallet' %}">
+                {% trans "Wallet & Spending" %}
+            </a>
+        </aside>
+        <div class="profile-content">
+            {% block profile_content %}{% endblock %}
+        </div>
+    </section>
+{% endblock %}
+</main>
+{% endblock %}

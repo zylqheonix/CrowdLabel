@@ -1,0 +1,167 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ project.name }} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide">
+    <div class="page-head">
+        <div>
+            <h1>{{ project.name }}</h1>
+            <p class="lead">
+                {% if project.status == "pending" %}
+                    {% trans "Pending admin activation — read-only progress will update once workers begin." %}
+                {% else %}
+                    {% trans "Live task progress and analytics for your project." %}
+                {% endif %}
+            </p>
+        </div>
+        <div class="page-actions-cluster">
+            <a class="btn btn-secondary" href="{% url 'customer_dashboard' %}">{% trans "Back to projects" %}</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="flash-wrap">
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="card">
+        <h2 class="card-title">{% trans "Project status" %}</h2>
+        {% if project.is_complete %}
+            <p><span class="project-status-pill project-status-active">{% trans "Complete" %}</span></p>
+            <p class="hint">{% trans "Marked complete by admin. Worker pool serving can remain on or be disabled in project settings." %}</p>
+        {% elif project.status == "pending" %}
+            <p><span class="project-status-pill project-status-pending">{% trans "Pending review" %}</span></p>
+            <p class="hint">{% trans "Admin still needs to activate this upload before workers can answer tasks." %}</p>
+        {% else %}
+            <p><span class="project-status-pill project-status-active">{% trans "Active" %}</span></p>
+            <p class="hint">{% trans "Workers can currently receive tasks from this project." %}</p>
+        {% endif %}
+    </section>
+
+    {% if upload_report %}
+        <section class="card">
+            <h2 class="card-title">{% trans "Upload validation report" %}</h2>
+            <p class="hint">
+                {% blocktrans with imported=upload_report.imported skipped=upload_report.skipped %}
+                    {{ imported }} rows imported, {{ skipped }} rows skipped.
+                {% endblocktrans %}
+            </p>
+            {% if upload_report.errors %}
+                <table class="scores analytics-mini-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Row" %}</th>
+                            <th>{% trans "Reason" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for err in upload_report.errors %}
+                            <tr>
+                                <td>{{ err.row }}</td>
+                                <td>{{ err.reason }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <section class="card">
+        <div class="stat-row">
+            <div class="stat">
+                <span class="stat-value">{{ progress.progress_pct }}%</span>
+                <span class="stat-label">{% trans "Tasks with answers" %}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">{{ progress.answered }} / {{ progress.total }}</span>
+                <span class="stat-label">{% trans "Answered / total" %}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">
+                    {% if project.deadline %}{{ project.deadline|date:"d/m/Y" }}{% else %}—{% endif %}
+                </span>
+                <span class="stat-label">{% trans "Deadline" %}</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">{% trans "Coverage status" %}</h2>
+        <table class="scores analytics-mini-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Tasks" %}</th>
+                    <th>{% trans "Definition" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in status_rows %}
+                    <tr>
+                        <td>{{ row.label }}</td>
+                        <td>{{ row.count }}</td>
+                        <td class="muted-cell">{{ row.hint }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="card analytics-section">
+        <h2 class="card-title">{% trans "Volume by" %} {{ volume_dimension }}</h2>
+        {% include "core/partials/analytics_bars.html" with bars=volume_bars %}
+    </section>
+
+    <section class="card analytics-section">
+        <h2 class="card-title">{% trans "Complexity distribution" %}</h2>
+        {% include "core/partials/analytics_bars.html" with bars=complexity_bars %}
+    </section>
+
+    <section class="card analytics-section">
+        <h2 class="card-title">{% trans "Coverage distribution" %}</h2>
+        {% include "core/partials/analytics_bars.html" with bars=coverage_bars %}
+    </section>
+
+    <section class="card analytics-section">
+        <h2 class="card-title">{% trans "Submissions over time" %}</h2>
+        <p class="hint">{% trans "Worker answer submissions per week (counts only — no worker identities)." %}</p>
+        {% include "core/partials/analytics_time_rows.html" with bars=activity_rows %}
+    </section>
+
+    <section class="card analytics-section">
+        <h2 class="card-title">{% trans "Answers by complexity" %}</h2>
+        {% include "core/partials/analytics_bars.html" with bars=answers_by_complexity %}
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">{% trans "Request deadline change" %}</h2>
+        {% if has_pending_deadline_request %}
+            <p class="hint">{% trans "You have a pending deadline change request awaiting admin review." %}</p>
+            {% if project.requested_deadline %}
+                <p>{% trans "Requested deadline:" %} <strong>{{ project.requested_deadline|date:"d/m/Y" }}</strong></p>
+            {% endif %}
+            {% if project.deadline_request_note %}
+                <p class="muted-cell">{{ project.deadline_request_note }}</p>
+            {% endif %}
+        {% else %}
+            <form method="post" class="customer-deadline-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="deadline_request">
+                <label for="requested_deadline">{% trans "New deadline" %}</label>
+                <input id="requested_deadline" name="requested_deadline" type="date" required>
+
+                <label for="deadline_request_note">{% trans "Note for admin" %} <span class="hint-inline">({% trans "optional" %})</span></label>
+                <textarea id="deadline_request_note" name="deadline_request_note" rows="3"></textarea>
+
+                <button class="btn" type="submit">{% trans "Submit request" %}</button>
+            </form>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

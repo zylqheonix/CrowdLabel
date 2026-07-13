@@ -1,0 +1,22 @@
+{% if admin_deadline_alerts %}
+    <section class="admin-deadline-banner-wrap" aria-live="polite">
+        <div class="admin-deadline-banner">
+            <div class="admin-deadline-title">Admin Attention: Project Deadlines</div>
+            <div class="admin-deadline-items">
+                {% for a in admin_deadline_alerts %}
+                    <div class="admin-deadline-item {{ a.severity_class }}">
+                        <div class="admin-deadline-left">
+                            <strong class="admin-deadline-name">{{ a.project.name }}</strong>
+                            <span class="admin-deadline-customer">{{ a.project.customer|default:"—" }}</span>
+                        </div>
+                        <div class="admin-deadline-right">
+                            <span class="admin-deadline-status">{{ a.status_label }}</span>
+                            <span class="admin-deadline-days">{{ a.day_phrase }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}
+

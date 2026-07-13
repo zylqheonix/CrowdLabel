@@ -1,0 +1,171 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Trophy Room" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide worker-page">
+{% block content %}
+    {% if new_badges %}
+        <div class="badge-toast" id="badge-toast">
+            <button class="toast-close" type="button" aria-label="{% trans 'Dismiss badge notification' %}">&times;</button>
+            <p class="toast-heading">{% trans "Achievement unlocked" %}</p>
+            {% for badge in new_badges %}
+                <p class="toast-item tier-{{ badge.tier|lower }}"><span class="toast-trophy" aria-hidden="true">🏆</span> {{ badge.label }} — {{ badge.tier }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <header class="page-action-row">
+        <div class="page-intro">
+            <h1>{% trans "Trophy Room" %}</h1>
+            <p class="lead">{% trans "Badges stay earned once unlocked." %}</p>
+        </div>
+        <a class="btn btn-secondary" href="{% url 'worker_dashboard' %}"><span class="nav-arrow nav-arrow-prev" aria-hidden="true">←</span> {% trans "Back to Dashboard" %}</a>
+    </header>
+
+    <section class="card invite-card">
+        <div class="invite-head">
+            <h2 class="card-title">{% trans "Referral rewards" %}</h2>
+            <p class="invite-progress">
+                {% blocktrans with successful=points.referrals_successful cap=points.referrals_cap reward=points.referral_reward_points %}Referrals: {{ successful }} / {{ cap }} — earn {{ reward }} pts when a friend signs up with your link.{% endblocktrans %}
+            </p>
+        </div>
+        <form method="post" action="{% url 'create_invite' %}">
+            {% csrf_token %}
+            <button class="btn" type="submit">{% trans "Create Invite Link" %}</button>
+        </form>
+        {% if invite_url %}
+            <div class="invite-share" data-url="{{ invite_url }}" data-message="{{ share_message }}" data-email-subject="{% trans 'Join me on CrowdLabel'|escapejs %}" data-copied="{% trans 'Copied!'|escapejs %}" data-copy-failed="{% trans 'Copy failed.'|escapejs %}">
+                <label for="invite-url">{% trans "Invite link" %}</label>
+                <div class="invite-row">
+                    <input id="invite-url" class="invite-input" value="{{ invite_url }}" readonly>
+                    <button class="btn btn-small invite-copy" type="button">{% trans "Copy" %}</button>
+                    <button class="btn btn-small btn-secondary invite-share-native" type="button">{% trans "Share" %}</button>
+                </div>
+                <p class="invite-copy-feedback" aria-live="polite"></p>
+                <div class="invite-quick-links">
+                    <a class="btn btn-small btn-secondary invite-email" target="_blank" rel="noopener noreferrer">{% trans "Email" %}</a>
+                    <a class="btn btn-small btn-secondary invite-sms" target="_blank" rel="noopener noreferrer">{% trans "SMS" %}</a>
+                    <a class="btn btn-small btn-secondary invite-wa" target="_blank" rel="noopener noreferrer">{% trans "WhatsApp" %}</a>
+                </div>
+            </div>
+        {% endif %}
+    </section>
+
+    <section class="card store-badges-section">
+        <h2 class="card-title">{% trans "Store Badges" %}</h2>
+        <p class="lead store-badges-lead">{% trans "Cosmetic badges bought with points." %}</p>
+        {% if purchased_badges %}
+            <div class="collected-badge-grid">
+                {% for badge in purchased_badges %}
+                    <div class="collected-badge">
+                        <span class="collected-badge-emoji" aria-hidden="true">{{ badge.emoji }}</span>
+                        <span class="collected-badge-label">{{ badge.label }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="history-empty">{% trans "No store badges yet." %} <a class="history-link" href="{% url 'store' %}">{% trans "Visit the Store" %}</a></p>
+        {% endif %}
+    </section>
+
+    <div class="trophy-grid">
+        {% for badge in badge_cards %}
+            <section class="trophy-card">
+                <div class="trophy-card-head">
+                    <h2>{{ badge.label }}</h2>
+                    <span class="trophy-score">{{ badge.current_value }}</span>
+                </div>
+
+                <div class="tier-row">
+                    {% for tier in badge.tiers %}
+                        <div class="tier-medal tier-{{ tier.name }} {% if tier.earned %}tier-earned{% else %}tier-locked{% endif %}">
+                            <span class="tier-medal-icon" aria-hidden="true"></span>
+                            <span class="tier-name">{{ tier.label }}</span>
+                            <span class="tier-threshold">{{ tier.threshold }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if badge.next_tier %}
+                    <div class="trophy-progress progress-tier-{{ badge.next_tier }}">
+                        <p class="trophy-progress-text">{{ badge.progress_text }}</p>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: {{ badge.progress_percent }}%;"></div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p class="trophy-maxed"><span aria-hidden="true">★</span> {% trans "Maxed out" %}</p>
+                {% endif %}
+            </section>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            {% if new_badges %}
+                const toast = document.getElementById("badge-toast");
+                const close = toast ? toast.querySelector(".toast-close") : null;
+                if (close) {
+                    close.addEventListener("click", function () {
+                        toast.remove();
+                    });
+                }
+            {% endif %}
+
+            const inviteShare = document.querySelector(".invite-share");
+            if (inviteShare) {
+                const url = inviteShare.dataset.url || "";
+                const message = inviteShare.dataset.message || "";
+                const emailSubject = inviteShare.dataset.emailSubject || "";
+                const copiedText = inviteShare.dataset.copied || "";
+                const copyFailedText = inviteShare.dataset.copyFailed || "";
+                const copyBtn = inviteShare.querySelector(".invite-copy");
+                const shareBtn = inviteShare.querySelector(".invite-share-native");
+                const feedback = inviteShare.querySelector(".invite-copy-feedback");
+                const email = inviteShare.querySelector(".invite-email");
+                const sms = inviteShare.querySelector(".invite-sms");
+                const wa = inviteShare.querySelector(".invite-wa");
+                const fullText = message ? message + " " + url : url;
+                const encoded = encodeURIComponent(fullText);
+
+                if (email) {
+                    email.href = "mailto:?subject=" + encodeURIComponent(emailSubject) + "&body=" + encoded;
+                }
+                if (sms) {
+                    sms.href = "sms:?&body=" + encoded;
+                }
+                if (wa) {
+                    wa.href = "https://wa.me/?text=" + encoded;
+                }
+
+                if (!navigator.share && shareBtn) {
+                    shareBtn.style.display = "none";
+                }
+
+                if (copyBtn) {
+                    copyBtn.addEventListener("click", async function () {
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            if (feedback) feedback.textContent = copiedText;
+                        } catch (err) {
+                            if (feedback) feedback.textContent = copyFailedText;
+                        }
+                    });
+                }
+
+                if (shareBtn) {
+                    shareBtn.addEventListener("click", async function () {
+                        if (!navigator.share) return;
+                        try {
+                            await navigator.share({ text: message, url: url });
+                        } catch (err) {}
+                    });
+                }
+            }
+        });
+    </script>
+{% endblock %}
+</main>
+{% endblock %}

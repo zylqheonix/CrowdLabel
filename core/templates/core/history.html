@@ -1,0 +1,41 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Answer History" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide worker-page">
+{% block content %}
+    <header class="page-action-row">
+        <div class="page-intro">
+            <h1>{% trans "Answer history" %}</h1>
+            <p class="lead">{% trans "Your latest result per question, grouped by difficulty." %}</p>
+        </div>
+        <a class="btn btn-secondary" href="{% url 'worker_dashboard' %}"><span class="nav-arrow nav-arrow-prev" aria-hidden="true">←</span> {% trans "Back to Dashboard" %}</a>
+    </header>
+
+    {% for section in sections %}
+        <section class="card history-section history-{{ section.key }}">
+            <div class="history-section-head">
+                <h2 class="card-title">{{ section.label }}</h2>
+                {% if not section.empty %}
+                    <p class="history-summary">
+                        {% blocktrans with label=section.label answered=section.summary.answered correct=section.summary.correct %}{{ label }} — {{ answered }} answered · {{ correct }} correct{% endblocktrans %}{% if section.summary.percent is not None %} · {{ section.summary.percent }}%{% endif %}
+                    </p>
+                {% endif %}
+            </div>
+
+            {% if section.empty %}
+                <p class="history-empty">{% blocktrans with key=section.key %}No {{ key }} questions yet.{% endblocktrans %}</p>
+            {% else %}
+                <div class="answer-grid" role="list" aria-label="{% blocktrans with label=section.label %}{{ label }} answers{% endblocktrans %}">
+                    {% for cell in section.cells %}
+                        <span class="answer-cell answer-{{ cell.status }}" role="listitem" title="{{ cell.title }}"></span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+    {% endfor %}
+{% endblock %}
+</main>
+{% endblock %}

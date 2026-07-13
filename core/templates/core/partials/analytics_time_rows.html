@@ -1,0 +1,15 @@
+{% if bars %}
+<div class="analytics-time-list" role="img" aria-label="{{ chart_label }}">
+    {% for bar in bars %}
+        <div class="analytics-time-row">
+            <span class="analytics-time-label"{% if bar.title %} title="{{ bar.title }}"{% endif %}>{{ bar.label }}</span>
+            <div class="analytics-time-track" aria-hidden="true">
+                <span class="analytics-time-fill" style="width: {{ bar.pct }}%"></span>
+            </div>
+            <span class="analytics-time-count">{{ bar.count }}</span>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="hint">No submissions in this window.</p>
+{% endif %}

@@ -1,0 +1,49 @@
+{% extends "core/profile_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Profile" %} · {% trans "Wallet" %}{% endblock %}
+
+{% block profile_content %}
+    <section class="wallet-stats">
+        <div class="card wallet-stat">
+            <p class="wallet-stat-label">{% trans "Lifetime earned" %}</p>
+            <p class="wallet-stat-value">✦ {{ wallet.earned }}</p>
+        </div>
+        <div class="card wallet-stat">
+            <p class="wallet-stat-label">{% trans "Lifetime spent" %}</p>
+            <p class="wallet-stat-value">{{ wallet.spent }}</p>
+        </div>
+        <div class="card wallet-stat">
+            <p class="wallet-stat-label">{% trans "Current points" %}</p>
+            <p class="wallet-stat-value">✦ {{ wallet.balance }}</p>
+        </div>
+    </section>
+
+    <section class="card wallet-history-card">
+        <h2 class="card-title">{% trans "Spend history" %}</h2>
+        {% if spend_rows %}
+            <div class="wallet-table-wrap">
+                <table class="wallet-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Date" %}</th>
+                            <th scope="col">{% trans "Reason" %}</th>
+                            <th scope="col">{% trans "Amount" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in spend_rows %}
+                            <tr>
+                                <td>{{ row.spend.created_at|date:"d/m/Y" }}</td>
+                                <td>{{ row.reason_label }}</td>
+                                <td class="wallet-spend-amount">-{{ row.spend.amount }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="history-empty">{% trans "No spending yet." %}</p>
+        {% endif %}
+    </section>
+{% endblock %}

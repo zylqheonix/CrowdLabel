@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}Review Queue · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide">
+    <div class="page-head">
+        <div>
+            <h1>Review Queue</h1>
+            <p class="lead">Read-only crowd-answer diagnostics by task.</p>
+        </div>
+        <a class="btn btn-secondary" href="{% url 'dashboard' %}">Back to Dashboard</a>
+    </div>
+
+    {% include "core/partials/review_queue_panel.html" %}
+</main>
+{% endblock %}

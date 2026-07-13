@@ -1,0 +1,1081 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-27 20:20+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: core/badges.py:10 core/templates/core/worker_dashboard.html:52
+msgid "Points"
+msgstr "النقاط"
+
+#: core/badges.py:17
+msgid "Tasks Completed"
+msgstr "المهام المكتملة"
+
+#: core/badges.py:24
+msgid "Daily Streak"
+msgstr "السلسلة اليومية"
+
+#: core/badges.py:35
+msgid "Bronze"
+msgstr "برونزي"
+
+#: core/badges.py:36
+msgid "Silver"
+msgstr "فضي"
+
+#: core/badges.py:37
+msgid "Gold"
+msgstr "ذهبي"
+
+#: core/badges.py:102
+#, python-format
+msgid "%(label)s: %(tier)s - %(current)s / %(threshold)s"
+msgstr "%(label)s: %(tier)s - %(current)s / %(threshold)s"
+
+#: core/badges.py:110 core/templates/core/trophy_room.html:99
+msgid "Maxed out"
+msgstr "الحد الأقصى"
+
+#: core/history.py:19 core/views.py:60
+msgid "Easy"
+msgstr "سهل"
+
+#: core/history.py:20 core/views.py:61
+msgid "Medium"
+msgstr "متوسط"
+
+#: core/history.py:21 core/views.py:62
+msgid "Hard"
+msgstr "صعب"
+
+#: core/history.py:51
+msgid "Correct"
+msgstr "صحيح"
+
+#: core/history.py:54
+msgid "Incorrect"
+msgstr "خطأ"
+
+#: core/history.py:57
+msgid "Unscored"
+msgstr "غير مُقيَّم"
+
+#: core/history.py:61
+#, python-format
+msgid "%(task_id)s — %(label)s"
+msgstr "%(task_id)s — %(label)s"
+
+#: core/history.py:190
+#, python-format
+msgid "%(date)s — %(count)s answers"
+msgstr "%(date)s — %(count)s إجابة"
+
+#: core/history.py:195
+#, python-format
+msgid "%(date)s — No activity"
+msgstr "%(date)s — لا نشاط"
+
+#: core/models.py:13 core/templates/core/dashboard.html:54
+#: core/templates/core/worker_dashboard.html:51
+msgid "Worker"
+msgstr "عامل"
+
+#: core/models.py:14
+msgid "Admin"
+msgstr "مسؤول"
+
+#: core/points.py:106
+msgid "Amount must be a positive integer."
+msgstr "يجب أن يكون المبلغ عدداً صحيحاً موجباً."
+
+#: core/points.py:116 core/templates/core/store.html:40
+msgid "Not enough points"
+msgstr "نقاط غير كافية"
+
+#: core/points.py:118
+#, python-format
+msgid "Spent %(amount)s points."
+msgstr "تم إنفاق %(amount)s نقطة."
+
+#: core/store.py:10
+msgid "Early Bird"
+msgstr "الطائر المبكر"
+
+#: core/store.py:13
+msgid "A shiny placeholder badge."
+msgstr "شارة تجريبية لامعة."
+
+#: core/store.py:16
+msgid "Night Owl"
+msgstr "بومة الليل"
+
+#: core/store.py:19
+msgid "Another placeholder badge."
+msgstr "شارة تجريبية أخرى."
+
+#: core/store.py:22
+msgid "Trailblazer"
+msgstr "الرائد"
+
+#: core/store.py:25
+msgid "A pricier placeholder badge."
+msgstr "شارة تجريبية أغلى."
+
+#: core/store.py:28
+msgid "Legend"
+msgstr "أسطورة"
+
+#: core/store.py:31
+msgid "The flex placeholder badge."
+msgstr "شارة التفاخر التجريبية."
+
+#: core/store.py:41
+#, python-format
+msgid "Store: %(label)s"
+msgstr "المتجر: %(label)s"
+
+#: core/store.py:85
+msgid "Unknown badge."
+msgstr "شارة غير معروفة."
+
+#: core/store.py:97
+msgid "Already owned."
+msgstr "مملوكة مسبقاً."
+
+#: core/store.py:105
+#, python-format
+msgid "You bought %(label)s!"
+msgstr "لقد اشتريت %(label)s!"
+
+#: core/streaks.py:71
+msgid "completed today"
+msgstr "أُكمِل اليوم"
+
+#: core/streaks.py:73
+msgid "do a task today to keep your streak"
+msgstr "أكمل مهمة اليوم للحفاظ على سلسلتك"
+
+#: core/streaks.py:75
+msgid "protection will save your streak today"
+msgstr "الحماية ستحفظ سلسلتك اليوم"
+
+#: core/streaks.py:80
+msgid "streak lost"
+msgstr "فُقدت السلسلة"
+
+#: core/templates/core/analytics.html:4 core/templates/core/analytics.html:10
+#: core/templates/core/dashboard.html:13
+msgid "Analytics"
+msgstr "التحليلات"
+
+#: core/templates/core/analytics.html:4 core/templates/core/base.html:7
+#: core/templates/core/base.html:20 core/templates/core/dashboard.html:4
+#: core/templates/core/history.html:4 core/templates/core/landing.html:4
+#: core/templates/core/landing.html:7 core/templates/core/login.html:4
+#: core/templates/core/not_authorized.html:4
+#: core/templates/core/profile_base.html:4 core/templates/core/register.html:4
+#: core/templates/core/store.html:4 core/templates/core/tasks.html:4
+#: core/templates/core/trophy_room.html:4
+#: core/templates/core/upload_tasks.html:4
+#: core/templates/core/worker_dashboard.html:4
+#: core/templates/core/worker_setup.html:4
+msgid "CrowdLabel"
+msgstr "CrowdLabel"
+
+#: core/templates/core/analytics.html:11
+msgid "Placeholder metrics — real analytics coming later."
+msgstr "مقاييس مؤقتة — التحليلات الحقيقية قادمة لاحقاً."
+
+#: core/templates/core/analytics.html:13 core/templates/core/history.html:14
+#: core/templates/core/profile_base.html:14 core/templates/core/store.html:14
+#: core/templates/core/trophy_room.html:24
+#: core/templates/core/upload_tasks.html:44
+msgid "Back to Dashboard"
+msgstr "العودة إلى لوحة التحكم"
+
+#: core/templates/core/analytics.html:18
+msgid "Project / Task Analytics"
+msgstr "تحليلات المشروع / المهام"
+
+#: core/templates/core/analytics.html:22
+msgid "Completion rate"
+msgstr "معدل الإكمال"
+
+#: core/templates/core/analytics.html:26
+msgid "Pending tasks"
+msgstr "المهام المعلقة"
+
+#: core/templates/core/analytics.html:30
+msgid "Avg. completion time"
+msgstr "متوسط وقت الإكمال"
+
+#: core/templates/core/analytics.html:33
+msgid "Throughput chart coming soon"
+msgstr "مخطط الإنتاجية قريباً"
+
+#: core/templates/core/analytics.html:37
+msgid "Worker Analytics"
+msgstr "تحليلات العمال"
+
+#: core/templates/core/analytics.html:41
+msgid "Avg. accuracy"
+msgstr "متوسط الدقة"
+
+#: core/templates/core/analytics.html:45
+msgid "Consistency"
+msgstr "الاتساق"
+
+#: core/templates/core/analytics.html:48
+msgid "Accuracy-over-time chart coming soon"
+msgstr "مخطط الدقة عبر الزمن قريباً"
+
+#: core/templates/core/analytics.html:52
+msgid "AI Analytics"
+msgstr "تحليلات الذكاء الاصطناعي"
+
+#: core/templates/core/analytics.html:56
+msgid "AI–human agreement"
+msgstr "اتفاق الذكاء الاصطناعي والبشر"
+
+#: core/templates/core/analytics.html:60
+msgid "Avg. AI confidence"
+msgstr "متوسط ثقة الذكاء الاصطناعي"
+
+#: core/templates/core/analytics.html:68
+msgid "Confidence distribution (sample data)"
+msgstr "توزيع الثقة (بيانات عينة)"
+
+#: core/templates/core/analytics.html:72
+msgid "Quality Analytics"
+msgstr "تحليلات الجودة"
+
+#: core/templates/core/analytics.html:76
+msgid "Verification rate"
+msgstr "معدل التحقق"
+
+#: core/templates/core/analytics.html:80
+msgid "Conflict rate"
+msgstr "معدل التعارض"
+
+#: core/templates/core/analytics.html:83
+msgid "Conflict breakdown chart coming soon"
+msgstr "مخطط تفصيل التعارضات قريباً"
+
+#: core/templates/core/base.html:35
+msgid "Invite"
+msgstr "دعوة"
+
+#: core/templates/core/base.html:39
+#: core/templates/core/profile_activity.html:4
+#: core/templates/core/profile_base.html:4
+#: core/templates/core/profile_base.html:11
+#: core/templates/core/profile_preferences.html:4
+#: core/templates/core/profile_security.html:4
+#: core/templates/core/profile_wallet.html:4
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+#: core/templates/core/base.html:41
+msgid "Settings"
+msgstr "الإعدادات"
+
+#: core/templates/core/base.html:43
+msgid "Log out"
+msgstr "تسجيل الخروج"
+
+#: core/templates/core/base.html:64
+msgid "Toggle dark mode"
+msgstr "تبديل الوضع الداكن"
+
+#: core/templates/core/dashboard.html:4
+msgid "Dashboard"
+msgstr "لوحة التحكم"
+
+#: core/templates/core/dashboard.html:10
+msgid "Admin Dashboard"
+msgstr "لوحة تحكم المسؤول"
+
+#: core/templates/core/dashboard.html:11
+msgid "Overview of tasks and worker performance."
+msgstr "نظرة عامة على المهام وأداء العمال."
+
+#: core/templates/core/dashboard.html:18 core/templates/core/tasks.html:4
+msgid "Tasks"
+msgstr "المهام"
+
+#: core/templates/core/dashboard.html:23
+msgid "Total tasks"
+msgstr "إجمالي المهام"
+
+#: core/templates/core/dashboard.html:27
+msgid "Gold task ratio"
+msgstr "نسبة مهام الذهب"
+
+#: core/templates/core/dashboard.html:33
+msgid "AI model"
+msgstr "نموذج الذكاء الاصطناعي"
+
+#: core/templates/core/dashboard.html:42
+#: core/templates/core/upload_tasks.html:4
+#: core/templates/core/upload_tasks.html:7
+msgid "Upload Tasks"
+msgstr "رفع المهام"
+
+#: core/templates/core/dashboard.html:47
+msgid "Leaderboard"
+msgstr "لوحة المتصدرين"
+
+#: core/templates/core/dashboard.html:53
+#: core/templates/core/worker_dashboard.html:50
+msgid "Rank"
+msgstr "الترتيب"
+
+#: core/templates/core/dashboard.html:55
+msgid "Accuracy"
+msgstr "الدقة"
+
+#: core/templates/core/dashboard.html:56
+msgid "Correct / Attempted"
+msgstr "صحيح / محاولات"
+
+#: core/templates/core/dashboard.html:71
+#: core/templates/core/dashboard.html:123
+msgid "No workers registered yet."
+msgstr "لا يوجد عمال مسجلون بعد."
+
+#: core/templates/core/dashboard.html:79
+msgid "Answer Times"
+msgstr "أوقات الإجابة"
+
+#: core/templates/core/dashboard.html:80
+msgid "Timing data from individual worker submissions."
+msgstr "بيانات التوقيت من إرسالات العمال الفردية."
+
+#: core/templates/core/dashboard.html:84
+msgid "Avg time per answer"
+msgstr "متوسط الوقت لكل إجابة"
+
+#: core/templates/core/dashboard.html:94
+#, python-format
+msgid "%(time)s avg"
+msgstr "%(time)s متوسط"
+
+#: core/templates/core/dashboard.html:95
+#, python-format
+msgid "%(counter)s answer"
+msgid_plural "%(counter)s answers"
+msgstr[0] "%(counter)s إجابة"
+msgstr[1] "%(counter)s إجابة"
+msgstr[2] "%(counter)s إجابتان"
+msgstr[3] "%(counter)s إجابات"
+msgstr[4] "%(counter)s إجابة"
+msgstr[5] "%(counter)s إجابة"
+
+#: core/templates/core/dashboard.html:101
+msgid "Task"
+msgstr "المهمة"
+
+#: core/templates/core/dashboard.html:102
+msgid "Selected"
+msgstr "المختار"
+
+#: core/templates/core/dashboard.html:103
+msgid "Time"
+msgstr "الوقت"
+
+#: core/templates/core/dashboard.html:117
+msgid "No answers recorded yet."
+msgstr "لا توجد إجابات مسجلة بعد."
+
+#: core/templates/core/history.html:4
+msgid "Answer History"
+msgstr "سجل الإجابات"
+
+#: core/templates/core/history.html:11
+msgid "Answer history"
+msgstr "سجل الإجابات"
+
+#: core/templates/core/history.html:12
+msgid "Your latest result per question, grouped by difficulty."
+msgstr "أحدث نتيجة لكل سؤال، مجمّعة حسب الصعوبة."
+
+#: core/templates/core/history.html:23
+#, python-format
+msgid "%(label)s — %(answered)s answered · %(correct)s correct"
+msgstr "%(label)s — %(answered)s مُجاب · %(correct)s صحيح"
+
+#: core/templates/core/history.html:29
+#, python-format
+msgid "No %(key)s questions yet."
+msgstr "لا توجد أسئلة %(key)s بعد."
+
+#: core/templates/core/history.html:31
+#, python-format
+msgid "%(label)s answers"
+msgstr "إجابات %(label)s"
+
+#: core/templates/core/landing.html:8
+msgid ""
+"A crowd-labeling platform for turning raw data into clean, labeled datasets."
+msgstr ""
+"منصة تصنيف جماعي لتحويل البيانات الخام إلى مجموعات بيانات نظيفة ومُوسومة."
+
+#: core/templates/core/landing.html:9 core/templates/core/login.html:4
+#: core/templates/core/login.html:7 core/templates/core/login.html:21
+msgid "Log In"
+msgstr "تسجيل الدخول"
+
+#: core/templates/core/landing.html:10 core/templates/core/login.html:24
+#: core/templates/core/register.html:4 core/templates/core/register.html:22
+msgid "Register"
+msgstr "التسجيل"
+
+#: core/templates/core/login.html:15 core/templates/core/register.html:16
+msgid "Username"
+msgstr "اسم المستخدم"
+
+#: core/templates/core/login.html:18 core/templates/core/register.html:19
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: core/templates/core/login.html:24
+msgid "No account yet?"
+msgstr "ليس لديك حساب بعد؟"
+
+#: core/templates/core/not_authorized.html:4
+#: core/templates/core/not_authorized.html:7
+msgid "Not authorized"
+msgstr "غير مصرح"
+
+#: core/templates/core/not_authorized.html:8
+msgid "You don't have permission to view this page."
+msgstr "ليس لديك إذن لعرض هذه الصفحة."
+
+#: core/templates/core/not_authorized.html:9
+msgid "Go to your tasks"
+msgstr "انتقل إلى مهامك"
+
+#: core/templates/core/partials/activity_calendar.html:4
+msgid "Activity"
+msgstr "النشاط"
+
+#: core/templates/core/partials/activity_calendar.html:11
+msgid "Previous month"
+msgstr "الشهر السابق"
+
+#: core/templates/core/partials/activity_calendar.html:17
+msgid "Next month"
+msgstr "الشهر التالي"
+
+#: core/templates/core/partials/activity_calendar.html:35
+#, python-format
+msgid "%(count)s active days in %(month)s"
+msgstr "%(count)s أيام نشطة في %(month)s"
+
+#: core/templates/core/partials/activity_calendar.html:36
+msgid "View answer history"
+msgstr "عرض سجل الإجابات"
+
+#: core/templates/core/partials/streak_toast.html:10
+msgid "Dismiss streak notification"
+msgstr "إغلاق إشعار السلسلة"
+
+#: core/templates/core/partials/streak_toast.html:11
+#: core/templates/core/worker_dashboard.html:31
+msgid "Daily streak"
+msgstr "السلسلة اليومية"
+
+#: core/templates/core/partials/streak_toast.html:21
+msgid "Streak protection unlocked"
+msgstr "تم فتح حماية السلسلة"
+
+#: core/templates/core/partials/topic_preferences_fields.html:2
+msgid "Leave all unchecked to get every topic."
+msgstr "اترك الكل غير محدد للحصول على كل المواضيع."
+
+#: core/templates/core/partials/topic_preferences_fields.html:5
+#, fuzzy
+#| msgid "Selected"
+msgid "Select all"
+msgstr "تحديد الكل"
+
+#: core/templates/core/partials/topic_preferences_fields.html:6
+msgid "Clear"
+msgstr "مسح"
+
+#: core/templates/core/partials/topic_preferences_fields.html:17
+msgid "No topics in the task pool yet."
+msgstr "لا توجد مواضيع في مجموعة المهام بعد."
+
+#: core/templates/core/profile_activity.html:4
+#: core/templates/core/profile_base.html:20
+msgid "Activity & Reputation"
+msgstr "النشاط والسمعة"
+
+#: core/templates/core/profile_activity.html:8
+#, python-format
+msgid "%(score)s reputation"
+msgstr "%(score)s سمعة"
+
+#: core/templates/core/profile_activity.html:9
+#, python-format
+msgid "%(correct)s correct · %(wrong)s wrong"
+msgstr "%(correct)s صحيح · %(wrong)s خطأ"
+
+#: core/templates/core/profile_activity.html:12
+msgid "Answer activity"
+msgstr "نشاط الإجابات"
+
+#: core/templates/core/profile_base.html:12
+msgid "View your activity, security, and wallet details."
+msgstr "اعرض نشاطك وأمانك وتفاصيل محفظتك."
+
+#: core/templates/core/profile_base.html:18
+msgid "Profile sections"
+msgstr "أقسام الملف الشخصي"
+
+#: core/templates/core/profile_base.html:23
+#: core/templates/core/profile_preferences.html:4
+#: core/templates/core/profile_preferences.html:7
+msgid "Preferences"
+msgstr "التفضيلات"
+
+#: core/templates/core/profile_base.html:26
+#: core/templates/core/profile_security.html:4
+msgid "Security"
+msgstr "الأمان"
+
+#: core/templates/core/profile_base.html:29
+msgid "Wallet & Spending"
+msgstr "المحفظة والإنفاق"
+
+#: core/templates/core/profile_preferences.html:8
+#: core/templates/core/worker_setup.html:31
+msgid "Question Topics"
+msgstr "مواضيع الأسئلة"
+
+#: core/templates/core/profile_preferences.html:9
+msgid ""
+"Change your language anytime using the EN | عربية switcher in the header."
+msgstr "غيّر لغتك في أي وقت باستخدام مبدّل EN | عربية في الشريط العلوي."
+
+#: core/templates/core/profile_preferences.html:14
+msgid "Save topic preferences"
+msgstr "حفظ تفضيلات المواضيع"
+
+#: core/templates/core/profile_security.html:9
+msgid "Change Username"
+msgstr "تغيير اسم المستخدم"
+
+#: core/templates/core/profile_security.html:15
+msgid "New username"
+msgstr "اسم المستخدم الجديد"
+
+#: core/templates/core/profile_security.html:17
+#: core/templates/core/profile_security.html:31
+msgid "Current password"
+msgstr "كلمة المرور الحالية"
+
+#: core/templates/core/profile_security.html:19
+msgid "Save Username"
+msgstr "حفظ اسم المستخدم"
+
+#: core/templates/core/profile_security.html:24
+msgid "Change Password"
+msgstr "تغيير كلمة المرور"
+
+#: core/templates/core/profile_security.html:37
+msgid "New password"
+msgstr "كلمة المرور الجديدة"
+
+#: core/templates/core/profile_security.html:43
+msgid "Confirm new password"
+msgstr "تأكيد كلمة المرور الجديدة"
+
+#: core/templates/core/profile_security.html:49
+msgid "Save Password"
+msgstr "حفظ كلمة المرور"
+
+#: core/templates/core/profile_wallet.html:4
+msgid "Wallet"
+msgstr "المحفظة"
+
+#: core/templates/core/profile_wallet.html:9
+msgid "Lifetime earned"
+msgstr "إجمالي المكتسب"
+
+#: core/templates/core/profile_wallet.html:13
+msgid "Lifetime spent"
+msgstr "إجمالي المنفق"
+
+#: core/templates/core/profile_wallet.html:17
+msgid "Current points"
+msgstr "النقاط الحالية"
+
+#: core/templates/core/profile_wallet.html:23
+msgid "Spend history"
+msgstr "سجل الإنفاق"
+
+#: core/templates/core/profile_wallet.html:29
+msgid "Date"
+msgstr "التاريخ"
+
+#: core/templates/core/profile_wallet.html:30
+#: core/templates/core/upload_tasks.html:22
+msgid "Reason"
+msgstr "السبب"
+
+#: core/templates/core/profile_wallet.html:31
+msgid "Amount"
+msgstr "المبلغ"
+
+#: core/templates/core/profile_wallet.html:46
+msgid "No spending yet."
+msgstr "لا يوجد إنفاق بعد."
+
+#: core/templates/core/register.html:7
+msgid "Create an account"
+msgstr "إنشاء حساب"
+
+#: core/templates/core/register.html:25
+msgid "Already have an account?"
+msgstr "لديك حساب بالفعل؟"
+
+#: core/templates/core/register.html:25
+msgid "Log in"
+msgstr "تسجيل الدخول"
+
+#: core/templates/core/store.html:4 core/templates/core/store.html:11
+#: core/templates/core/worker_dashboard.html:36
+msgid "Store"
+msgstr "المتجر"
+
+#: core/templates/core/store.html:12
+msgid "Spend points on cosmetic badges — no gameplay effect."
+msgstr "أنفق النقاط على شارات تجميلية — بلا تأثير على اللعب."
+
+#: core/templates/core/store.html:18
+#: core/templates/core/worker_dashboard.html:42
+#, python-format
+msgid "%(balance)s points"
+msgstr "%(balance)s نقطة"
+
+#: core/templates/core/store.html:27
+#, python-format
+msgid "%(cost)s points"
+msgstr "%(cost)s نقطة"
+
+#: core/templates/core/store.html:29
+msgid "Owned"
+msgstr "مملوكة"
+
+#: core/templates/core/store.html:38
+#, python-format
+msgid "Buy (%(cost)s)"
+msgstr "شراء (%(cost)s)"
+
+#: core/templates/core/store.html:49 core/templates/core/store.html:56
+msgid "Confirm purchase"
+msgstr "تأكيد الشراء"
+
+#: core/templates/core/store.html:55
+msgid "Cancel"
+msgstr "إلغاء"
+
+#: core/templates/core/store.html:71
+msgid "this badge"
+msgstr "هذه الشارة"
+
+#: core/templates/core/store.html:72
+msgid "Spend"
+msgstr "أنفق"
+
+#: core/templates/core/store.html:73
+msgid "points on"
+msgstr "نقطة على"
+
+#: core/templates/core/store.html:74
+msgid "This is cosmetic only."
+msgstr "هذا تجميلي فقط."
+
+#: core/templates/core/tasks.html:8
+#, python-format
+msgid "No %(label)s tasks available"
+msgstr "لا توجد مهام %(label)s متاحة"
+
+#: core/templates/core/tasks.html:11
+#, fuzzy
+#| msgid "There are no questions available for this difficulty yet."
+msgid ""
+"There are no questions available for this difficulty and your selected "
+"topics. Try changing topic preferences in Profile → Preferences."
+msgstr ""
+"لا توجد أسئلة متاحة لهذه الصعوبة والمواضيع المحددة. جرّب تغيير تفضيلات "
+"المواضيع في الملف الشخصي."
+
+#: core/templates/core/tasks.html:13
+msgid "There are no questions available for this difficulty yet."
+msgstr "لا توجد أسئلة متاحة لهذه الصعوبة بعد."
+
+#: core/templates/core/tasks.html:16
+msgid "Back to Difficulty Selection"
+msgstr "العودة إلى اختيار الصعوبة"
+
+#: core/templates/core/tasks.html:18
+#, python-format
+msgid "You've completed all %(label)s questions"
+msgstr "لقد أكملت جميع أسئلة %(label)s"
+
+#: core/templates/core/tasks.html:19
+#, python-format
+msgid "Nice work. There are no unanswered %(label)s questions left right now."
+msgstr "عمل رائع. لا توجد أسئلة %(label)s غير مُجابة الآن."
+
+#: core/templates/core/tasks.html:20
+msgid "Back to Progress Dashboard"
+msgstr "العودة إلى لوحة التقدم"
+
+#: core/templates/core/tasks.html:23 core/templates/core/tasks.html:41
+msgid "Exit"
+msgstr "خروج"
+
+#: core/templates/core/tasks.html:30
+msgid "Label this image"
+msgstr "وسم هذه الصورة"
+
+#: core/templates/core/tasks.html:31
+#, python-format
+msgid "%(label)s run"
+msgstr "جولة %(label)s"
+
+#: core/templates/core/tasks.html:37
+msgid "Exit this run?"
+msgstr "الخروج من هذه الجولة؟"
+
+#: core/templates/core/tasks.html:38
+msgid "You'll return to the dashboard. You can resume this difficulty later."
+msgstr "ستعود إلى لوحة التحكم. يمكنك استئناف هذه الصعوبة لاحقاً."
+
+#: core/templates/core/tasks.html:40
+msgid "Stay"
+msgstr "البقاء"
+
+#: core/templates/core/tasks.html:46
+msgid "Task image"
+msgstr "صورة المهمة"
+
+#: core/templates/core/tasks.html:68
+msgid "Submit"
+msgstr "إرسال"
+
+#: core/templates/core/tasks.html:75
+msgid "Correct!"
+msgstr "صحيح!"
+
+#: core/templates/core/tasks.html:77
+#, python-format
+msgid "Incorrect — the answer was %(answer)s"
+msgstr "خطأ — الإجابة كانت %(answer)s"
+
+#: core/templates/core/tasks.html:80
+msgid "Answer recorded."
+msgstr "تم تسجيل الإجابة."
+
+#: core/templates/core/tasks.html:84
+msgid "Next Question"
+msgstr "السؤال التالي"
+
+#: core/templates/core/tasks.html:86
+msgid "Finish"
+msgstr "إنهاء"
+
+#: core/templates/core/trophy_room.html:4
+#: core/templates/core/trophy_room.html:21
+#: core/templates/core/worker_dashboard.html:35
+msgid "Trophy Room"
+msgstr "غرفة الجوائز"
+
+#: core/templates/core/trophy_room.html:11
+#: core/templates/core/worker_dashboard.html:13
+msgid "Dismiss badge notification"
+msgstr "إغلاق إشعار الشارة"
+
+#: core/templates/core/trophy_room.html:12
+#: core/templates/core/worker_dashboard.html:14
+msgid "Achievement unlocked"
+msgstr "تم فتح إنجاز"
+
+#: core/templates/core/trophy_room.html:22
+msgid "Badges stay earned once unlocked."
+msgstr "الشارات تبقى مكتسبة بعد فتحها."
+
+#: core/templates/core/trophy_room.html:29
+msgid "Referral rewards"
+msgstr "مكافآت الإحالة"
+
+#: core/templates/core/trophy_room.html:31
+#, python-format
+msgid ""
+"Referrals: %(successful)s / %(cap)s — earn %(reward)s pts when a friend "
+"signs up with your link."
+msgstr ""
+"الإحالات: %(successful)s / %(cap)s — اكسب %(reward)s نقطة عند تسجيل صديق "
+"برابطك."
+
+#: core/templates/core/trophy_room.html:36
+msgid "Create Invite Link"
+msgstr "إنشاء رابط دعوة"
+
+#: core/templates/core/trophy_room.html:39
+msgid "Join me on CrowdLabel"
+msgstr "انضم إليّ على CrowdLabel"
+
+#: core/templates/core/trophy_room.html:39
+msgid "Copied!"
+msgstr "تم النسخ!"
+
+#: core/templates/core/trophy_room.html:39
+msgid "Copy failed."
+msgstr "فشل النسخ."
+
+#: core/templates/core/trophy_room.html:40
+msgid "Invite link"
+msgstr "رابط الدعوة"
+
+#: core/templates/core/trophy_room.html:43
+msgid "Copy"
+msgstr "نسخ"
+
+#: core/templates/core/trophy_room.html:44
+msgid "Share"
+msgstr "مشاركة"
+
+#: core/templates/core/trophy_room.html:48
+msgid "Email"
+msgstr "بريد"
+
+#: core/templates/core/trophy_room.html:49
+msgid "SMS"
+msgstr "رسالة نصية"
+
+#: core/templates/core/trophy_room.html:50
+msgid "WhatsApp"
+msgstr "واتساب"
+
+#: core/templates/core/trophy_room.html:57
+msgid "Store Badges"
+msgstr "شارات المتجر"
+
+#: core/templates/core/trophy_room.html:58
+msgid "Cosmetic badges bought with points."
+msgstr "شارات تجميلية تُشترى بالنقاط."
+
+#: core/templates/core/trophy_room.html:69
+msgid "No store badges yet."
+msgstr "لا توجد شارات متجر بعد."
+
+#: core/templates/core/trophy_room.html:69
+msgid "Visit the Store"
+msgstr "زيارة المتجر"
+
+#: core/templates/core/upload_tasks.html:8
+msgid ""
+"Upload a CSV of tasks. Rows with an existing task ID are updated, not "
+"duplicated."
+msgstr ""
+"ارفع ملف CSV للمهام. الصفوف ذات معرف مهمة موجود يتم تحديثها وليس تكرارها."
+
+#: core/templates/core/upload_tasks.html:16
+#, python-format
+msgid "%(created)s created · %(updated)s updated · %(failed)s failed"
+msgstr "%(created)s أُنشئ · %(updated)s حُدّث · %(failed)s فشل"
+
+#: core/templates/core/upload_tasks.html:19
+msgid "Rows that failed"
+msgstr "الصفوف الفاشلة"
+
+#: core/templates/core/upload_tasks.html:22
+msgid "Row"
+msgstr "صف"
+
+#: core/templates/core/upload_tasks.html:35
+msgid "CSV file"
+msgstr "ملف CSV"
+
+#: core/templates/core/upload_tasks.html:37
+msgid "Upload"
+msgstr "رفع"
+
+#: core/templates/core/upload_tasks.html:41
+#, python-format
+msgid "Expected columns: %(cols)s"
+msgstr "الأعمدة المتوقعة: %(cols)s"
+
+#: core/templates/core/worker_dashboard.html:4
+#: core/templates/core/worker_dashboard.html:23
+msgid "Let's go"
+msgstr "لنبدأ"
+
+#: core/templates/core/worker_dashboard.html:24
+msgid "Pick a difficulty and jump back in."
+msgstr "اختر صعوبة وابدأ من جديد."
+
+#: core/templates/core/worker_dashboard.html:29
+#, python-format
+msgid "Daily streak %(count)s"
+msgstr "السلسلة اليومية %(count)s"
+
+#: core/templates/core/worker_dashboard.html:31
+msgid "Protection"
+msgstr "الحماية"
+
+#: core/templates/core/worker_dashboard.html:32
+#, python-format
+msgid "Best %(count)s"
+msgstr "الأفضل %(count)s"
+
+#: core/templates/core/worker_dashboard.html:45
+#: core/templates/core/worker_dashboard.html:46
+#, fuzzy
+#| msgid "Leaderboard"
+msgid "Points Leaderboard"
+msgstr "لوحة صدارة النقاط"
+
+#: core/templates/core/worker_dashboard.html:68
+#, python-format
+msgid "You — #%(rank)s · %(points)s points"
+msgstr "أنت — #%(rank)s · %(points)s نقطة"
+
+#: core/templates/core/worker_dashboard.html:83
+msgid "Complete"
+msgstr "مكتمل"
+
+#: core/templates/core/worker_dashboard.html:88
+#, python-format
+msgid "%(completed)s / %(total)s completed"
+msgstr "%(completed)s / %(total)s مكتمل"
+
+#: core/templates/core/worker_dashboard.html:94
+msgid "Current selection"
+msgstr "الاختيار الحالي"
+
+#: core/templates/core/worker_dashboard.html:97
+msgid "Resume"
+msgstr "استئناف"
+
+#: core/templates/core/worker_dashboard.html:97
+msgid "Start"
+msgstr "بدء"
+
+#: core/templates/core/worker_setup.html:4
+msgid "Personalize"
+msgstr "تخصيص"
+
+#: core/templates/core/worker_setup.html:9
+msgid "Welcome! Personalize your experience"
+msgstr "مرحباً! خصّص تجربتك"
+
+#: core/templates/core/worker_setup.html:10
+msgid "Choose your language and the question topics you want to work on."
+msgstr "اختر لغتك ومواضيع الأسئلة التي تريد العمل عليها."
+
+#: core/templates/core/worker_setup.html:11
+msgid ""
+"You can change these anytime in Profile → Preferences and the language "
+"switcher in the header."
+msgstr ""
+"يمكنك تغيير هذه الإعدادات في أي وقت من الملف الشخصي ← التفضيلات أو مبدّل "
+"اللغة في الشريط العلوي."
+
+#: core/templates/core/worker_setup.html:17
+msgid "Language"
+msgstr "اللغة"
+
+#: core/templates/core/worker_setup.html:35
+#, fuzzy
+#| msgid "Back to Dashboard"
+msgid "Continue to dashboard"
+msgstr "المتابعة إلى لوحة التحكم"
+
+#: core/views.py:60
+msgid "Complexity 1 tasks"
+msgstr "مهام التعقيد 1"
+
+#: core/views.py:61
+msgid "Complexity 2–3 tasks"
+msgstr "مهام التعقيد 2–3"
+
+#: core/views.py:62
+msgid "Complexity 4 tasks"
+msgstr "مهام التعقيد 4"
+
+#: core/views.py:131
+msgid "Username is required"
+msgstr "اسم المستخدم مطلوب"
+
+#: core/views.py:137
+msgid "Username already taken"
+msgstr "اسم المستخدم مستخدم بالفعل"
+
+#: core/views.py:144
+msgid "Password must be at least 6 characters"
+msgstr "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
+
+#: core/views.py:176
+msgid "Invalid credentials, try again"
+msgstr "بيانات اعتماد غير صحيحة، حاول مرة أخرى"
+
+#: core/views.py:204
+msgid "Current password is incorrect."
+msgstr "كلمة المرور الحالية غير صحيحة."
+
+#: core/views.py:206
+msgid "Username is required."
+msgstr "اسم المستخدم مطلوب."
+
+#: core/views.py:208
+msgid "Username already taken."
+msgstr "اسم المستخدم مستخدم بالفعل."
+
+#: core/views.py:224
+msgid "Username updated."
+msgstr "تم تحديث اسم المستخدم."
+
+#: core/views.py:237
+msgid "Password updated."
+msgstr "تم تحديث كلمة المرور."
+
+#: core/views.py:326
+msgid "Topic preferences saved."
+msgstr "تم حفظ تفضيلات المواضيع."
+
+#: core/views.py:584
+msgid "Join me on CrowdLabel and start earning points."
+msgstr "انضم إليّ على CrowdLabel وابدأ بكسب النقاط."
+
+#: core/views.py:802
+msgid "Please choose a CSV file."
+msgstr "يرجى اختيار ملف CSV."
+
+#: core/views.py:811
+msgid "File must be a UTF-8 encoded CSV."
+msgstr "يجب أن يكون الملف CSV بترميز UTF-8."
+
+#: core/views.py:822
+msgid "invalid JSON in choices"
+msgstr "JSON غير صالح في الخيارات"

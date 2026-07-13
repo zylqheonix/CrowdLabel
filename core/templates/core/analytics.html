@@ -1,0 +1,272 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Analytics" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide admin-analytics-page" id="admin-analytics-page">
+    <div id="admin-analytics-content">
+    <div class="page-head">
+        <div>
+            <h1>{% trans "Analytics" %}</h1>
+            <p class="lead">{% trans "Live task throughput and worker accuracy — computed from current data." %}</p>
+        </div>
+        <div class="page-actions-cluster">
+            <a class="btn btn-secondary" href="{% url 'projects' %}">{% trans "Projects" %}</a>
+            <a class="btn btn-secondary" href="{% url 'question_distribution' %}">{% trans "Distribution" %}</a>
+            <a class="btn btn-secondary" href="{% url 'review_queue' %}?project={{ selected.project }}">{% trans "Review Queue" %}</a>
+            <a class="btn btn-secondary" href="{% url 'dashboard' %}">{% trans "Back to Dashboard" %}</a>
+        </div>
+    </div>
+
+    <section class="card analytics-section project-scope-card">
+        {% include "core/partials/project_scope_selector.html" with preserve_query=selected %}
+    </section>
+
+    <section class="card analytics-section">
+        <h2 class="card-title">{% trans "Task Analytics" %}</h2>
+
+        <div class="stat-row analytics-kpi-row">
+            <div class="stat">
+                <span class="stat-value">{{ task_kpis.total_tasks }}</span>
+                <span class="stat-label">{% trans "Total tasks" %}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">{{ task_kpis.gold_tasks }}</span>
+                <span class="stat-label">{% trans "Gold tasks" %}{% if task_kpis.gold_pct is not None %} ({{ task_kpis.gold_pct }}%){% endif %}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">{{ task_kpis.attention_count }}</span>
+                <span class="stat-label">{% trans "Needing attention" %}</span>
+            </div>
+        </div>
+
+        <p class="hint">
+            {% trans "Task status is derived from answer coverage — the Task model has no status field." %}
+            <a href="{% url 'review_queue' %}?project={{ selected.project }}">{% trans "Open review queue" %} ({{ task_kpis.attention_count }} {% trans "flagged" %})</a>
+        </p>
+
+        <table class="scores analytics-mini-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Coverage status" %}</th>
+                    <th>{% trans "Tasks" %}</th>
+                    <th>{% trans "Definition" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in task_kpis.status_rows %}
+                    <tr>
+                        <td>{{ row.label }}</td>
+                        <td>{{ row.count }}</td>
+                        <td class="muted-cell">{{ row.hint }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <form method="get" class="analytics-filter-form">
+            <label>{% trans "Volume by" %}
+                <select class="select" name="task_dimension">
+                    <option value="category" {% if selected.task_dimension == "category" %}selected{% endif %}>{% trans "Category" %}</option>
+                    <option value="topic" {% if selected.task_dimension == "topic" %}selected{% endif %}>{% trans "Topic (region_tag)" %}</option>
+                    <option value="complexity" {% if selected.task_dimension == "complexity" %}selected{% endif %}>{% trans "Complexity" %}</option>
+                    <option value="type" {% if selected.task_dimension == "type" %}selected{% endif %}>{% trans "Type (format)" %}</option>
+                </select>
+            </label>
+            <input type="hidden" name="project" value="{{ selected.project }}">
+            <input type="hidden" name="active_days" value="{{ selected.active_days }}">
+            <input type="hidden" name="activity_granularity" value="{{ selected.activity_granularity }}">
+            <input type="hidden" name="worker_order" value="{{ selected.worker_order }}">
+            <button class="btn btn-small" type="submit">{% trans "Apply" %}</button>
+        </form>
+        <h3 class="analytics-subtitle">{% blocktrans with dim=task_dimension_label %}Volume by {{ dim }}{% endblocktrans %}</h3>
+        {% include "core/partials/analytics_bars.html" with bars=volume_bars chart_label=task_dimension_label %}
+
+        <h3 class="analytics-subtitle">{% trans "Complexity distribution" %}</h3>
+        {% include "core/partials/analytics_bars.html" with bars=complexity_bars chart_label="Complexity distribution" %}
+
+        <h3 class="analytics-subtitle">{% trans "Coverage distribution" %} <span class="hint-inline">({% trans "WorkerAnswer rows per task" %})</span></h3>
+        {% include "core/partials/analytics_bars.html" with bars=coverage_bars chart_label="Coverage distribution" %}
+
+        <h3 class="analytics-subtitle">{% trans "Gold task pass rate" %} <span class="hint-inline">({% trans "verified answers on gold tasks" %})</span></h3>
+        <table class="scores analytics-mini-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Complexity" %}</th>
+                    <th>{% trans "Correct" %}</th>
+                    <th>{% trans "Total verified" %}</th>
+                    <th>{% trans "Pass rate" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in gold_pass_rows %}
+                    <tr>
+                        <td>{{ row.label }}</td>
+                        <td>{{ row.correct }}</td>
+                        <td>{{ row.total }}</td>
+                        <td>{% if row.rate_pct is None %}—{% else %}{{ row.rate_pct }}%{% endif %}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4">{% trans "No verified answers on gold tasks yet." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="card analytics-section">
+        <h2 class="card-title">{% trans "Worker Analytics" %}</h2>
+
+        <form method="get" class="analytics-filter-form">
+            <input type="hidden" name="task_dimension" value="{{ selected.task_dimension }}">
+            <input type="hidden" name="project" value="{{ selected.project }}">
+            <input type="hidden" name="activity_granularity" value="{{ selected.activity_granularity }}">
+            <input type="hidden" name="worker_order" value="{{ selected.worker_order }}">
+            <label>{% trans "Active window" %}
+                <select class="select" name="active_days">
+                    <option value="7" {% if selected.active_days == 7 %}selected{% endif %}>{% trans "Last 7 days" %}</option>
+                    <option value="30" {% if selected.active_days == 30 %}selected{% endif %}>{% trans "Last 30 days" %}</option>
+                </select>
+            </label>
+            <button class="btn btn-small" type="submit">{% trans "Apply" %}</button>
+        </form>
+
+        <div class="stat-row analytics-kpi-row">
+            <div class="stat">
+                <span class="stat-value">{{ worker_kpis.total_workers }}</span>
+                <span class="stat-label">{% trans "Registered workers" %}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">{{ worker_kpis.active_workers }}</span>
+                <span class="stat-label">{% blocktrans with days=worker_kpis.active_days %}Active ({{ days }}d){% endblocktrans %}</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">{{ worker_kpis.avg_tasks_per_worker }}</span>
+                <span class="stat-label">{% trans "Avg. distinct tasks / worker" %}</span>
+            </div>
+        </div>
+        <p class="hint">{% blocktrans with n=worker_kpis.workers_with_answers %}Among {{ n }} worker(s) with at least one answer.{% endblocktrans %}</p>
+
+        <h3 class="analytics-subtitle">{% trans "Accuracy distribution" %} <span class="hint-inline">({% trans "per worker, all verified answers" %})</span></h3>
+        {% if accuracy_meta.low_sample_warning %}
+            <p class="analytics-warning">{% blocktrans with n=accuracy_meta.workers_meaningful min=accuracy_meta.min_volume %}Only {{ n }} worker(s) have ≥{{ min }} verified answers — treat this histogram cautiously.{% endblocktrans %}</p>
+        {% endif %}
+        {% include "core/partials/analytics_bars.html" with bars=accuracy_bars chart_label="Worker accuracy distribution" %}
+
+        <form method="get" class="analytics-filter-form">
+            <input type="hidden" name="task_dimension" value="{{ selected.task_dimension }}">
+            <input type="hidden" name="project" value="{{ selected.project }}">
+            <input type="hidden" name="active_days" value="{{ selected.active_days }}">
+            <input type="hidden" name="worker_order" value="{{ selected.worker_order }}">
+            <label>{% trans "Activity granularity" %}
+                <select class="select" name="activity_granularity">
+                    <option value="day" {% if selected.activity_granularity == "day" %}selected{% endif %}>{% trans "Per day" %}</option>
+                    <option value="week" {% if selected.activity_granularity == "week" %}selected{% endif %}>{% trans "Per week" %}</option>
+                </select>
+            </label>
+            <button class="btn btn-small" type="submit">{% trans "Apply" %}</button>
+        </form>
+        <h3 class="analytics-subtitle">
+            {% trans "Submissions over time" %}
+            <span class="hint-inline">
+                {% if selected.activity_granularity == "week" %}
+                    ({% trans "weekly buckets, last 90 days — Mon–Sun" %})
+                {% else %}
+                    ({% trans "daily, last 90 days" %})
+                {% endif %}
+            </span>
+        </h3>
+        {% include "core/partials/analytics_time_rows.html" with bars=activity_bars chart_label="Worker submissions over time" %}
+
+        <h3 class="analytics-subtitle">{% trans "Answers by task complexity" %}</h3>
+        {% include "core/partials/analytics_bars.html" with bars=complexity_answer_bars chart_label="Answers by complexity" %}
+
+        <h3 class="analytics-subtitle">{% trans "Workers by volume" %}</h3>
+        <div class="analytics-table-wrap">
+            <table class="scores analytics-worker-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Worker" %}</th>
+                        <th>
+                            <a class="analytics-sort-link{% if worker_order == 'volume_desc' %} active{% endif %}" href="?project={{ selected.project }}&task_dimension={{ selected.task_dimension }}&active_days={{ selected.active_days }}&activity_granularity={{ selected.activity_granularity }}&worker_order=volume_desc">{% trans "Distinct tasks" %} ↓</a>
+                            /
+                            <a class="analytics-sort-link{% if worker_order == 'volume_asc' %} active{% endif %}" href="?project={{ selected.project }}&task_dimension={{ selected.task_dimension }}&active_days={{ selected.active_days }}&activity_granularity={{ selected.activity_granularity }}&worker_order=volume_asc">↑</a>
+                        </th>
+                        <th>{% trans "Total answers" %}</th>
+                        <th>
+                            <a class="analytics-sort-link{% if worker_order == 'accuracy_desc' %} active{% endif %}" href="?project={{ selected.project }}&task_dimension={{ selected.task_dimension }}&active_days={{ selected.active_days }}&activity_granularity={{ selected.activity_granularity }}&worker_order=accuracy_desc">{% trans "Accuracy" %} ↓</a>
+                            /
+                            <a class="analytics-sort-link{% if worker_order == 'accuracy_asc' %} active{% endif %}" href="?project={{ selected.project }}&task_dimension={{ selected.task_dimension }}&active_days={{ selected.active_days }}&activity_granularity={{ selected.activity_granularity }}&worker_order=accuracy_asc">↑</a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in worker_rows %}
+                        <tr>
+                            <td>{{ row.username }}</td>
+                            <td>{{ row.task_count }}</td>
+                            <td>{{ row.answer_count }}</td>
+                            <td>{{ row.accuracy_display }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4">{% trans "No worker submissions yet." %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    {# AI Analytics (future) — no AI accuracy, calibration, confidence, or crowd-vs-model data yet. #}
+    </div>
+</main>
+<script>
+    (function () {
+        const page = document.getElementById("admin-analytics-page");
+        if (!page) return;
+
+        function bindInteractiveFilters() {
+            const forms = page.querySelectorAll(".analytics-filter-form, .project-scope-form");
+            forms.forEach((form) => {
+                form.addEventListener("submit", function (event) {
+                    event.preventDefault();
+                    const action = form.getAttribute("action") || window.location.pathname;
+                    const params = new URLSearchParams(new FormData(form));
+                    const nextUrl = params.toString() ? `${action}?${params}` : action;
+                    updateAnalytics(nextUrl);
+                });
+            });
+
+            const sortLinks = page.querySelectorAll(".analytics-sort-link");
+            sortLinks.forEach((link) => {
+                link.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    const href = link.getAttribute("href");
+                    if (href) updateAnalytics(href);
+                });
+            });
+        }
+
+        async function updateAnalytics(url) {
+            const content = document.getElementById("admin-analytics-content");
+            if (!content) return;
+            try {
+                const response = await fetch(url, {
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                });
+                if (!response.ok) return;
+                const html = await response.text();
+                const parsed = new DOMParser().parseFromString(html, "text/html");
+                const nextContent = parsed.getElementById("admin-analytics-content");
+                if (!nextContent) return;
+                content.innerHTML = nextContent.innerHTML;
+                window.history.replaceState({}, "", url);
+                bindInteractiveFilters();
+            } catch (error) {
+                // Keep UX resilient; fail silently and preserve current content.
+            }
+        }
+
+        bindInteractiveFilters();
+    })();
+</script>
+{% endblock %}

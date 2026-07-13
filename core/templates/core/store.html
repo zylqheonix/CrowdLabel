@@ -1,0 +1,113 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Store" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide worker-page">
+{% block content %}
+    <header class="page-action-row">
+        <div class="page-intro">
+            <h1>{% trans "Store" %}</h1>
+            <p class="lead">{% trans "Spend points on cosmetic badges — no gameplay effect." %}</p>
+        </div>
+        <a class="btn btn-secondary" href="{% url 'worker_dashboard' %}"><span class="nav-arrow nav-arrow-prev" aria-hidden="true">←</span> {% trans "Back to Dashboard" %}</a>
+    </header>
+
+    <div class="points-strip points-strip-dashboard store-balance">
+        <p class="points-balance">✦ {% blocktrans with balance=balance %}{{ balance }} points{% endblocktrans %}</p>
+    </div>
+
+    <div class="store-grid">
+        {% for item in catalog %}
+            <section class="card store-card {% if item.owned %}store-card-owned{% endif %}">
+                <p class="store-emoji" aria-hidden="true">{{ item.emoji }}</p>
+                <h2 class="card-title">{{ item.label }}</h2>
+                <p class="store-desc">{{ item.desc }}</p>
+                <p class="store-cost">✦ {% blocktrans with cost=item.cost %}{{ cost }} points{% endblocktrans %}</p>
+                {% if item.owned %}
+                    <button class="btn btn-secondary" type="button" disabled>✓ {% trans "Owned" %}</button>
+                {% elif item.affordable %}
+                    <button
+                        class="btn store-buy-btn"
+                        type="button"
+                        data-badge-key="{{ item.key }}"
+                        data-badge-label="{{ item.label }}"
+                        data-badge-cost="{{ item.cost }}"
+                        data-badge-emoji="{{ item.emoji }}"
+                    >{% blocktrans with cost=item.cost %}Buy ({{ cost }}){% endblocktrans %}</button>
+                {% else %}
+                    <button class="btn btn-secondary" type="button" disabled>{% trans "Not enough points" %}</button>
+                {% endif %}
+            </section>
+        {% endfor %}
+    </div>
+
+    <div class="exit-modal" id="purchase-modal" hidden>
+        <div class="exit-modal-backdrop" id="purchase-modal-backdrop"></div>
+        <div class="exit-modal-card" role="dialog" aria-modal="true" aria-labelledby="purchase-modal-title">
+            <h2 class="exit-modal-title" id="purchase-modal-title">{% trans "Confirm purchase" %}</h2>
+            <p class="exit-modal-text" id="purchase-modal-text"></p>
+            <form method="post" action="{% url 'buy_badge' %}" id="purchase-form">
+                {% csrf_token %}
+                <input type="hidden" name="badge_key" id="purchase-badge-key" value="">
+                <div class="exit-modal-actions">
+                    <button class="btn btn-secondary" type="button" id="purchase-cancel">{% trans "Cancel" %}</button>
+                    <button class="btn" type="submit" id="purchase-confirm">{% trans "Confirm purchase" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const modal = document.getElementById("purchase-modal");
+            const backdrop = document.getElementById("purchase-modal-backdrop");
+            const cancel = document.getElementById("purchase-cancel");
+            const text = document.getElementById("purchase-modal-text");
+            const badgeKeyInput = document.getElementById("purchase-badge-key");
+            const buyButtons = document.querySelectorAll(".store-buy-btn");
+            const i18n = {
+                thisBadge: "{% trans 'this badge'|escapejs %}",
+                spendPrefix: "{% trans 'Spend'|escapejs %}",
+                pointsOn: "{% trans 'points on'|escapejs %}",
+                cosmeticOnly: "{% trans 'This is cosmetic only.'|escapejs %}"
+            };
+
+            function openModal(button) {
+                const label = button.dataset.badgeLabel || i18n.thisBadge;
+                const cost = button.dataset.badgeCost || "0";
+                const emoji = button.dataset.badgeEmoji || "";
+                badgeKeyInput.value = button.dataset.badgeKey || "";
+                text.textContent =
+                    i18n.spendPrefix + " " + cost + " " + i18n.pointsOn + " " + emoji + " " + label + "? " + i18n.cosmeticOnly;
+                modal.hidden = false;
+            }
+
+            function closeModal() {
+                modal.hidden = true;
+                badgeKeyInput.value = "";
+            }
+
+            buyButtons.forEach(function (button) {
+                button.addEventListener("click", function () {
+                    openModal(button);
+                });
+            });
+
+            if (cancel) {
+                cancel.addEventListener("click", closeModal);
+            }
+            if (backdrop) {
+                backdrop.addEventListener("click", closeModal);
+            }
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && modal && !modal.hidden) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+{% endblock %}
+</main>
+{% endblock %}

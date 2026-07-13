@@ -1,0 +1,43 @@
+{% extends "core/profile_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Profile" %} · {% trans "Preferences" %}{% endblock %}
+
+{% block profile_content %}
+    <section class="card profile-preferences-card" aria-label="{% trans 'Preferences' %}">
+        <h2 class="card-title">{% trans "Question Topics" %}</h2>
+        <p class="hint preferences-hint">{% trans "Change your language anytime using the EN | عربية switcher in the header." %}</p>
+        <form method="post" action="{% url 'profile_preferences' %}" class="topic-preferences-form">
+            {% csrf_token %}
+            <input type="hidden" name="form" value="topic_preferences">
+            {% include "core/partials/topic_preferences_fields.html" %}
+            <button class="btn" type="submit">{% trans "Save topic preferences" %}</button>
+        </form>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const topicForm = document.querySelector(".topic-preferences-form");
+            if (!topicForm) {
+                return;
+            }
+            const selectAll = topicForm.querySelector(".topic-select-all");
+            const clearAll = topicForm.querySelector(".topic-clear-all");
+            const boxes = topicForm.querySelectorAll('input[name="preferred_topics"]');
+            if (selectAll) {
+                selectAll.addEventListener("click", function () {
+                    boxes.forEach(function (box) {
+                        box.checked = true;
+                    });
+                });
+            }
+            if (clearAll) {
+                clearAll.addEventListener("click", function () {
+                    boxes.forEach(function (box) {
+                        box.checked = false;
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,52 +1,165 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 
-{% block title %}Tasks · CrowdLabel{% endblock %}
+{% block title %}{% trans "Tasks" %} · {% trans "CrowdLabel" %}{% endblock %}
 
 {% block content %}
-    {% if finished %}
-        <h1>You've completed all tasks</h1>
-        <p class="lead">Thanks for labeling. There are no more questions right now.</p>
-        <a class="btn" href="{% url 'tasks' %}?q=0">Start Over</a>
+    {% if no_tasks %}
+        <h1>{% blocktrans with label=difficulty_label %}No {{ label }} tasks available{% endblocktrans %}</h1>
+        <p class="lead">
+            {% if topics_filtered %}
+                {% trans "There are no questions available for this difficulty and your selected topics. Try changing topic preferences in Profile → Preferences." %}
+            {% else %}
+                {% trans "There are no questions available for this difficulty yet." %}
+            {% endif %}
+        </p>
+        <a class="btn" href="{% url 'worker_dashboard' %}">{% trans "Back to Difficulty Selection" %}</a>
+    {% elif finished %}
+        <h1>{% blocktrans with label=difficulty_label %}You've completed all {{ label }} questions{% endblocktrans %}</h1>
+        <p class="lead">{% blocktrans with label=difficulty_label %}Nice work. There are no unanswered {{ label }} questions left right now.{% endblocktrans %}</p>
+        <a class="btn" href="{% url 'worker_dashboard' %}">{% trans "Back to Progress Dashboard" %}</a>
     {% else %}
-        <h1>Label this image</h1>
+        <div class="task-top-bar">
+            <button type="button" class="btn-exit" id="task-exit">{% trans "Exit" %}</button>
+            {% if show_answer_timer %}
+                <span class="answer-timer" id="answer-timer" aria-live="polite">00:00</span>
+            {% endif %}
+        </div>
 
-        <img class="task-image" src="{{ question.image }}" alt="Task image">
+        <div class="task-head-intro">
+            <h1>{% trans "Label this image" %}</h1>
+            <p class="task-meta">{% blocktrans with label=difficulty_label %}{{ label }} run{% endblocktrans %}</p>
+        </div>
 
-        <p class="question-text">{{ question.text }}</p>
+        <div class="exit-modal" id="exit-modal" hidden>
+            <div class="exit-modal-backdrop" id="exit-modal-backdrop"></div>
+            <div class="exit-modal-card" role="dialog" aria-modal="true" aria-labelledby="exit-modal-title">
+                <h2 class="exit-modal-title" id="exit-modal-title">{% trans "Exit this run?" %}</h2>
+                <p class="exit-modal-text">{% trans "You'll return to the dashboard. You can resume this difficulty later." %}</p>
+                <div class="exit-modal-actions">
+                    <button type="button" class="btn btn-secondary" id="exit-cancel">{% trans "Stay" %}</button>
+                    <a class="btn btn-exit-confirm" href="{% url 'worker_dashboard' %}">{% trans "Exit" %}</a>
+                </div>
+            </div>
+        </div>
 
-        <form method="post" action="{% url 'tasks' %}">
+        <img class="task-image" src="{{ task.image }}" alt="{% trans 'Task image' %}">
+
+        <p class="question-text">{{ task.task }}</p>
+
+        <form method="post" action="{% url 'tasks' %}" id="answer-form">
             {% csrf_token %}
-            <input type="hidden" name="index" value="{{ index }}">
+            <input type="hidden" name="task_id" value="{{ task.id }}">
+            <input type="hidden" name="time_taken_seconds" id="time-taken-seconds">
 
             <fieldset class="options" {% if answered %}disabled{% endif %}>
-                {% for option in question.options %}
+                {% for key, label in task.choices.items %}
                     <label class="option
-                        {% if answered and option == question.correct %} option-correct{% endif %}
-                        {% if answered and option == selected and not is_correct %} option-wrong{% endif %}">
-                        <input type="radio" name="answer" value="{{ option }}"
-                            {% if option == selected %}checked{% endif %}>
-                        <span>{{ option }}</span>
+                        {% if answered and verified and key == correct_answer %} option-correct{% endif %}
+                        {% if answered and verified and key == selected and not is_correct %} option-wrong{% endif %}">
+                        <input type="radio" name="answer" value="{{ key }}"
+                            {% if key == selected %}checked{% endif %}>
+                        <span>{{ label }}</span>
                     </label>
                 {% endfor %}
             </fieldset>
 
             {% if not answered %}
-                <button class="btn" type="submit">Submit</button>
+                <button class="btn" type="submit">{% trans "Submit" %}</button>
             {% endif %}
         </form>
 
         {% if answered %}
-            {% if is_correct %}
-                <p class="feedback feedback-correct">Correct!</p>
+            {% if verified %}
+                {% if is_correct %}
+                    <p class="feedback feedback-correct">{% trans "Correct!" %}</p>
+                {% else %}
+                    <p class="feedback feedback-wrong">{% blocktrans with answer=correct_label %}Incorrect — the answer was {{ answer }}{% endblocktrans %}</p>
+                {% endif %}
             {% else %}
-                <p class="feedback feedback-wrong">Incorrect — the answer was {{ question.correct }}</p>
+                <p class="feedback feedback-neutral">{% trans "Answer recorded." %}</p>
             {% endif %}
 
             {% if has_next %}
-                <a class="btn" href="{% url 'tasks' %}?q={{ next_index }}">Next Question</a>
+                <a class="btn" href="{% url 'tasks' %}">{% trans "Next Question" %}</a>
             {% else %}
-                <a class="btn" href="{% url 'tasks' %}?q={{ next_index }}">Finish</a>
+                <a class="btn" href="{% url 'worker_dashboard' %}">{% trans "Finish" %}</a>
             {% endif %}
         {% endif %}
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let startedAt = performance.now();
+                const form = document.getElementById("answer-form");
+                const hiddenInput = document.getElementById("time-taken-seconds");
+                const visibleTimer = document.getElementById("answer-timer");
+
+                function elapsedSeconds() {
+                    return Math.max(0, (performance.now() - startedAt) / 1000);
+                }
+
+                function formatTimer(seconds) {
+                    const total = Math.floor(seconds);
+                    const mins = Math.floor(total / 60);
+                    const secs = total % 60;
+                    return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+                }
+
+                function resetTimer() {
+                    startedAt = performance.now();
+                    if (visibleTimer) {
+                        visibleTimer.textContent = "00:00";
+                    }
+                }
+
+                document.addEventListener("visibilitychange", function () {
+                    resetTimer();
+                });
+
+                if (visibleTimer) {
+                    window.setInterval(function () {
+                        visibleTimer.textContent = formatTimer(elapsedSeconds());
+                    }, 250);
+                }
+
+                if (form && hiddenInput) {
+                    form.addEventListener("submit", function () {
+                        hiddenInput.value = elapsedSeconds().toFixed(3);
+                    });
+                }
+
+                const exitButton = document.getElementById("task-exit");
+                const exitModal = document.getElementById("exit-modal");
+                const exitCancel = document.getElementById("exit-cancel");
+                const exitBackdrop = document.getElementById("exit-modal-backdrop");
+
+                function openExitModal() {
+                    if (exitModal) {
+                        exitModal.hidden = false;
+                    }
+                }
+
+                function closeExitModal() {
+                    if (exitModal) {
+                        exitModal.hidden = true;
+                    }
+                }
+
+                if (exitButton) {
+                    exitButton.addEventListener("click", openExitModal);
+                }
+                if (exitCancel) {
+                    exitCancel.addEventListener("click", closeExitModal);
+                }
+                if (exitBackdrop) {
+                    exitBackdrop.addEventListener("click", closeExitModal);
+                }
+                document.addEventListener("keydown", function (event) {
+                    if (event.key === "Escape" && exitModal && !exitModal.hidden) {
+                        closeExitModal();
+                    }
+                });
+            });
+        </script>
     {% endif %}
 {% endblock %}

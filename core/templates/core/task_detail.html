@@ -1,0 +1,55 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Task Detail" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide">
+    <div class="page-head">
+        <div>
+            <h1>{% trans "Task Detail" %}</h1>
+            <p class="lead">{% blocktrans with task_id=task_obj.task_id %}Question preview for {{ task_id }}.{% endblocktrans %}</p>
+        </div>
+        <a class="btn btn-secondary" href="{{ back_url }}">{% trans "Back" %}</a>
+    </div>
+
+    <section class="card">
+        <div class="review-summary">
+            <p><strong>{% trans "Task ID" %}:</strong> {{ task_obj.task_id }}</p>
+            <p><strong>{% trans "Project" %}:</strong> {{ task_obj.project.name }}</p>
+            <p><strong>{% trans "Category" %}:</strong> {{ task_obj.category|default:"—" }}</p>
+            <p><strong>{% trans "Type" %}:</strong> {{ task_obj.format|default:"—" }}</p>
+            <p><strong>{% trans "Topic" %}:</strong> {{ task_obj.region_tag|default:"—" }}</p>
+            <p><strong>{% trans "Complexity" %}:</strong> {{ task_obj.complexity|default:"—" }}</p>
+            <p><strong>{% trans "Gold Task" %}:</strong> {% if task_obj.is_goldtask %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</p>
+            <p><strong>{% trans "Ground truth" %}:</strong> {{ task_obj.correct_answer|default:"—" }}</p>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">{% trans "Question" %}</h2>
+        {% if task_obj.image %}
+            <img class="task-image" src="{{ task_obj.image }}" alt="{% trans 'Task image' %}">
+        {% endif %}
+        <p>{{ task_obj.task }}</p>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">{% trans "Choices" %}</h2>
+        {% if task_obj.choices %}
+            <div class="options">
+                {% for key, value in task_obj.choices.items %}
+                    <label class="option{% if task_obj.correct_answer and key == task_obj.correct_answer %} option-correct{% endif %}">
+                        <span><strong>{{ key }}.</strong> {{ value }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            {% if task_obj.correct_answer %}
+                <p class="hint">{% blocktrans with answer=task_obj.correct_answer %}Ground truth choice: {{ answer }}{% endblocktrans %}</p>
+            {% endif %}
+        {% else %}
+            <p>{% trans "No choices available." %}</p>
+        {% endif %}
+    </section>
+</main>
+{% endblock %}

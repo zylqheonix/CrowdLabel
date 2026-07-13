@@ -1,0 +1,65 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Personalize" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide worker-page">
+    <div class="card worker-setup-card">
+        <h1>{% trans "Welcome! Personalize your experience" %}</h1>
+        <p class="lead">{% trans "Choose your language and the question topics you want to work on." %}</p>
+        <p class="hint setup-settings-note">{% trans "You can change these anytime in Profile → Preferences and the language switcher in the header." %}</p>
+
+        <form method="post" action="{% url 'worker_setup' %}" class="worker-setup-form topic-preferences-form">
+            {% csrf_token %}
+
+            <fieldset class="setup-fieldset setup-language">
+                <legend class="setup-legend">{% trans "Language" %}</legend>
+                <div class="setup-language-options">
+                    <label class="setup-language-option">
+                        <input type="radio" name="language" value="en"{% if current_language == "en" %} checked{% endif %}>
+                        <span>English</span>
+                    </label>
+                    <label class="setup-language-option">
+                        <input type="radio" name="language" value="ar"{% if current_language == "ar" %} checked{% endif %}>
+                        <span>العربية</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            <fieldset class="setup-fieldset">
+                <legend class="setup-legend">{% trans "Question Topics" %}</legend>
+                {% include "core/partials/topic_preferences_fields.html" %}
+            </fieldset>
+
+            <button class="btn" type="submit">{% trans "Continue to dashboard" %}</button>
+        </form>
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector(".worker-setup-form");
+        if (!form) {
+            return;
+        }
+        const selectAll = form.querySelector(".topic-select-all");
+        const clearAll = form.querySelector(".topic-clear-all");
+        const boxes = form.querySelectorAll('input[name="preferred_topics"]');
+        if (selectAll) {
+            selectAll.addEventListener("click", function () {
+                boxes.forEach(function (box) {
+                    box.checked = true;
+                });
+            });
+        }
+        if (clearAll) {
+            clearAll.addEventListener("click", function () {
+                boxes.forEach(function (box) {
+                    box.checked = false;
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

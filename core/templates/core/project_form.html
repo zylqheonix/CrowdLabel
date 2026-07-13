@@ -1,0 +1,219 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}
+    {% if form_mode == "create" %}{% trans "New project" %}{% else %}{% trans "Edit project" %}{% endif %}
+    · {% trans "CrowdLabel" %}
+{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide project-form-page">
+    <div class="page-head">
+        <div>
+            <h1>
+                {% if form_mode == "create" %}
+                    {% trans "New project" %}
+                {% elif is_pending %}
+                    {% trans "Set up customer project" %}
+                {% else %}
+                    {% trans "Edit project" %}
+                {% endif %}
+            </h1>
+            <p class="lead">
+                {% if is_pending %}
+                    {% trans "Review the upload, adjust settings if needed, then activate to release tasks to workers." %}
+                {% elif form_mode == "create" %}
+                    {% trans "Create a new labeling project." %}
+                {% else %}
+                    {% trans "Update project settings and worker pool visibility." %}
+                {% endif %}
+            </p>
+        </div>
+        <div class="page-actions-cluster">
+            <a class="btn btn-secondary" href="{% url 'projects' %}">{% trans "Back to projects" %}</a>
+            {% if form_mode == "edit" %}
+                <a class="btn btn-secondary" href="{% url 'analytics' %}?project={{ project.id }}">{% trans "Analytics" %}</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="flash-wrap">
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if form_mode == "edit" and is_pending %}
+        <section class="card project-activation-hero">
+            <div class="project-activation-copy">
+                <span class="project-status-pill project-status-pending">{% trans "Needs activation" %}</span>
+                <h2 class="card-title">{% trans "Customer upload ready for review" %}</h2>
+                <p class="hint">
+                    {% trans "Tasks stay hidden from workers until you activate this project." %}
+                </p>
+            </div>
+            <dl class="project-activation-stats">
+                <div class="project-activation-stat">
+                    <dt>{% trans "Project" %}</dt>
+                    <dd>{{ project.name }}</dd>
+                </div>
+                <div class="project-activation-stat">
+                    <dt>{% trans "Customer" %}</dt>
+                    <dd>{{ owner_username|default:project.customer|default:"—" }}</dd>
+                </div>
+                <div class="project-activation-stat">
+                    <dt>{% trans "Tasks uploaded" %}</dt>
+                    <dd>{{ task_count }}</dd>
+                </div>
+                <div class="project-activation-stat">
+                    <dt>{% trans "Proposed deadline" %}</dt>
+                    <dd>{% if project.deadline %}{{ project.deadline|date:"d/m/Y" }}{% else %}—{% endif %}</dd>
+                </div>
+                <div class="project-activation-stat">
+                    <dt>{% trans "Submitted" %}</dt>
+                    <dd>{{ project.created_at|date:"d/m/Y" }}</dd>
+                </div>
+            </dl>
+            <form method="post" class="project-activation-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="activate">
+                <button class="btn project-activation-btn" type="submit">{% trans "Activate project" %}</button>
+            </form>
+        </section>
+
+        {% if pending_preview %}
+            <section class="card">
+                <h2 class="card-title">{% trans "Pre-activation quality preview" %}</h2>
+                <p class="hint">
+                    {% blocktrans with total=pending_preview.total_tasks gold=pending_preview.gold_count %}
+                        {{ total }} tasks uploaded · {{ gold }} marked as gold.
+                    {% endblocktrans %}
+                </p>
+                {% if pending_preview.warnings %}
+                    <ul>
+                        {% for warning in pending_preview.warnings %}
+                            <li>{{ warning }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="hint">{% trans "No obvious row-level data issues detected in this upload." %}</p>
+                {% endif %}
+                {% if pending_preview.sample_tasks %}
+                    <table class="scores analytics-mini-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Task ID" %}</th>
+                                <th>{% trans "Topic" %}</th>
+                                <th>{% trans "Complexity" %}</th>
+                                <th>{% trans "Gold" %}</th>
+                                <th>{% trans "Prompt preview" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in pending_preview.sample_tasks %}
+                                <tr>
+                                    <td>{{ row.task_id }}</td>
+                                    <td>{{ row.region_tag|default:"—" }}</td>
+                                    <td>{{ row.complexity|default:"—" }}</td>
+                                    <td>{% if row.is_goldtask %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                                    <td>{{ row.task|truncatechars:90|default:"—" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </section>
+        {% endif %}
+    {% endif %}
+
+    <div class="project-form-layout{% if form_mode == 'edit' and has_deadline_request %} project-form-layout--with-side{% endif %}">
+        <section class="card project-form-card">
+            <h2 class="card-title">{% trans "Project settings" %}</h2>
+            <form method="post" class="project-settings-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="save">
+
+                <div class="project-form-grid">
+                    <div class="project-form-field">
+                        <label for="name">{% trans "Name" %}</label>
+                        <input id="name" name="name" type="text" required value="{% if project %}{{ project.name }}{% endif %}">
+                    </div>
+
+                    <div class="project-form-field">
+                        <label for="customer">{% trans "Customer" %} <span class="hint-inline">({% trans "optional" %})</span></label>
+                        <input id="customer" name="customer" type="text" value="{% if project %}{{ project.customer }}{% endif %}">
+                    </div>
+
+                    <div class="project-form-field">
+                        <label for="deadline">{% trans "Deadline" %} <span class="hint-inline">({% trans "optional" %})</span></label>
+                        <input
+                            id="deadline"
+                            name="deadline"
+                            type="date"
+                            value="{% if project and project.deadline %}{{ project.deadline|date:'Y-m-d' }}{% endif %}"
+                        >
+                    </div>
+
+                    <div class="project-form-field">
+                        <label for="alert_lead_days">{% trans "Approaching lead days" %}</label>
+                        <input
+                            id="alert_lead_days"
+                            name="alert_lead_days"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value="{% if project %}{{ project.alert_lead_days|default:7 }}{% else %}7{% endif %}"
+                        >
+                    </div>
+                </div>
+
+                <div class="project-form-checks">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="is_complete" {% if project and project.is_complete %}checked{% endif %}>
+                        {% trans "Mark complete (never alert)" %}
+                    </label>
+
+                    {% if form_mode == "edit" and not is_pending %}
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="is_active" {% if project.is_active %}checked{% endif %}>
+                            {% trans "Active (tasks from this project are shown to workers)" %}
+                        </label>
+                    {% elif form_mode == "edit" and is_pending %}
+                        <p class="hint project-form-pending-note">
+                            {% trans "Worker visibility is off until you activate this project above." %}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="project-form-actions">
+                    <button class="btn" type="submit">{% trans "Save settings" %}</button>
+                </div>
+            </form>
+        </section>
+
+        {% if form_mode == "edit" and has_deadline_request %}
+            <aside class="card project-side-card">
+                <h2 class="card-title">{% trans "Deadline change request" %}</h2>
+                <p>{% trans "Requested deadline:" %} <strong>{{ project.requested_deadline|date:"d/m/Y" }}</strong></p>
+                {% if project.deadline_request_note %}
+                    <p class="project-side-note">{{ project.deadline_request_note }}</p>
+                {% endif %}
+                <div class="project-side-actions">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="approve_deadline">
+                        <button class="btn" type="submit">{% trans "Approve" %}</button>
+                    </form>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="dismiss_deadline">
+                        <button class="btn btn-secondary" type="submit">{% trans "Dismiss" %}</button>
+                    </form>
+                </div>
+            </aside>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

@@ -1,10 +1,11 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 
-{% block title %}CrowdLabel{% endblock %}
+{% block title %}{% trans "CrowdLabel" %}{% endblock %}
 
 {% block content %}
-    <h1>CrowdLabel</h1>
-    <p class="lead">A crowd-labeling platform for turning raw data into clean, labeled datasets.</p>
-    <a class="btn" href="{% url 'login' %}">Log In</a>
-    <a class="btn btn-secondary" href="{% url 'register' %}">Register</a>
+    <h1>{% trans "CrowdLabel" %}</h1>
+    <p class="lead">{% trans "A crowd-labeling platform for turning raw data into clean, labeled datasets." %}</p>
+    <a class="btn" href="{% url 'login' %}">{% trans "Log In" %}</a>
+    <a class="btn btn-secondary" href="{% url 'register' %}">{% trans "Register" %}</a>
 {% endblock %}

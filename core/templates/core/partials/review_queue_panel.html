@@ -1,0 +1,178 @@
+<section class="card review-card">
+    <div class="review-head">
+        <h2 class="card-title">Review Queue</h2>
+        <p class="hint">{{ review_summary.total_tasks }} task(s) in scope.</p>
+    </div>
+
+    <div class="review-summary">
+        <p><strong>Total tasks:</strong> {{ review_summary.total_tasks }}</p>
+        <p><strong>Total flagged:</strong> {{ review_summary.total_flagged }}</p>
+        <p><strong>Crowd vs truth:</strong> {{ review_summary.flag_counts.crowd_vs_truth }}</p>
+        <p><strong>Crowd disagreement:</strong> {{ review_summary.flag_counts.crowd_disagreement }}</p>
+        <p><strong>Gold failures:</strong> {{ review_summary.flag_counts.gold_failure }}</p>
+    </div>
+
+    <form method="get" class="review-filters">
+        <div class="review-project-row">
+            <label>Project
+                <select class="select" name="project">
+                    {% for project in projects %}
+                        <option value="{{ project.id }}" {% if review_selected.project == project.id|stringformat:"s" %}selected{% endif %}>
+                            {{ project.name }}{% if not project.is_active %} (inactive){% endif %}
+                        </option>
+                    {% endfor %}
+                    <option value="all" {% if review_selected.project == "all" %}selected{% endif %}>All projects</option>
+                </select>
+            </label>
+        </div>
+        <div class="review-multi-grid">
+            <label>Flag reason
+                <select class="select" name="flag">
+                    <option value="">All</option>
+                    <option value="crowd_vs_truth" {% if "crowd_vs_truth" in review_selected.flags %}selected{% endif %}>Crowd vs truth</option>
+                    <option value="crowd_disagreement" {% if "crowd_disagreement" in review_selected.flags %}selected{% endif %}>Crowd disagreement</option>
+                    <option value="gold_failure" {% if "gold_failure" in review_selected.flags %}selected{% endif %}>Gold failure</option>
+                </select>
+            </label>
+            <label>Topic
+                <select class="select" name="topic">
+                    <option value="">All</option>
+                    {% for value in review_filter_options.topics %}
+                        <option value="{{ value }}" {% if value in review_selected.topics %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
+        <div class="review-single-grid">
+            <label>Category
+                <select class="select" name="category">
+                    <option value="">All</option>
+                    {% for value in review_filter_options.categories %}
+                        <option value="{{ value }}" {% if review_selected.category == value %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Type
+                <select class="select" name="type">
+                    <option value="">All</option>
+                    {% for value in review_filter_options.types %}
+                        <option value="{{ value }}" {% if review_selected.type == value %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Complexity
+                <select class="select" name="complexity">
+                    <option value="">All</option>
+                    {% for value in review_filter_options.complexities %}
+                        <option value="{{ value }}" {% if value in review_selected.complexities %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Gold/Regular
+                <select class="select" name="gold">
+                    <option value="">All</option>
+                    <option value="gold" {% if review_selected.gold == "gold" %}selected{% endif %}>Gold</option>
+                    <option value="regular" {% if review_selected.gold == "regular" %}selected{% endif %}>Regular</option>
+                </select>
+            </label>
+            <label>Resolution
+                <select class="select" name="resolution">
+                    <option value="">All</option>
+                    <option value="resolved" {% if review_selected.resolution == "resolved" %}selected{% endif %}>Resolved</option>
+                    <option value="unresolved" {% if review_selected.resolution == "unresolved" %}selected{% endif %}>Unresolved</option>
+                </select>
+            </label>
+            <label>Min coverage
+                <input class="select" type="number" min="0" name="min_coverage" value="{{ review_selected.min_coverage }}">
+            </label>
+            <label>Sort
+                <select class="select" name="sort">
+                    <option value="agreement" {% if review_selected.sort == "agreement" %}selected{% endif %}>agreement asc</option>
+                    <option value="answer_count" {% if review_selected.sort == "answer_count" %}selected{% endif %}>answer_count</option>
+                    <option value="complexity" {% if review_selected.sort == "complexity" %}selected{% endif %}>complexity</option>
+                </select>
+            </label>
+        </div>
+
+        <div class="review-actions">
+            <button class="btn" type="submit">Apply</button>
+            <a class="btn btn-secondary" href="?project={{ review_selected.project }}">Reset</a>
+        </div>
+    </form>
+
+    <div class="review-table-wrap">
+        <table class="scores review-queue-table">
+            <thead>
+                <tr>
+                    <th>Task ID</th>
+                    <th>Topic</th>
+                    <th>Type</th>
+                    <th>Complexity</th>
+                    <th>Distribution</th>
+                    <th>Answers</th>
+                    <th>Agreement</th>
+                    <th>Human majority</th>
+                    <th>Ground truth</th>
+                    <th>Flags</th>
+                    <th>Resolve</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in review_page_obj.object_list %}
+                    <tr{% if row.is_resolved %} class="review-row-resolved"{% endif %}>
+                        <td>
+                            <a href="{% url 'admin_task_detail' row.pk %}?next={{ request.get_full_path|urlencode }}">
+                                {{ row.task_id }}
+                            </a>
+                        </td>
+                        <td>{{ row.topic }}</td>
+                        <td>{{ row.type }}</td>
+                        <td>{{ row.complexity }}</td>
+                        <td>{{ row.distribution }}</td>
+                        <td>{{ row.answer_count }}</td>
+                        <td>{% if row.agreement_pct is None %}—{% else %}{{ row.agreement_pct }}%{% endif %}</td>
+                        <td>{{ row.majority }}</td>
+                        <td>{{ row.ground_truth }}</td>
+                        <td>
+                            {% if row.is_resolved %}
+                                <span class="review-resolved-pill">
+                                    Resolved: {{ row.resolved_answer }}{% if row.resolved_by %} by {{ row.resolved_by }}{% endif %}
+                                </span>
+                            {% endif %}
+                            {% if row.flag_reason != "—" %}
+                                <span>{{ row.flag_reason }}</span>
+                            {% endif %}
+                            {% if not row.is_resolved and row.flag_reason == "—" %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.is_goldtask %}
+                                —
+                            {% elif row.is_resolved %}
+                                <a href="{% url 'resolve_review_item' row.pk %}?next={{ request.get_full_path|urlencode }}">Update</a>
+                            {% else %}
+                                <a href="{% url 'resolve_review_item' row.pk %}?next={{ request.get_full_path|urlencode }}">Resolve</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="11">No rows match the selected filters.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if review_page_obj.paginator.num_pages > 1 %}
+        <div class="review-pagination">
+            {% if review_page_obj.has_previous %}
+                <a href="?{% if review_base_querystring %}{{ review_base_querystring }}&{% endif %}review_page={{ review_page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span>Page {{ review_page_obj.number }} of {{ review_page_obj.paginator.num_pages }}</span>
+            {% if review_page_obj.has_next %}
+                <a href="?{% if review_base_querystring %}{{ review_base_querystring }}&{% endif %}review_page={{ review_page_obj.next_page_number }}">Next</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>

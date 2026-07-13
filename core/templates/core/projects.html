@@ -1,0 +1,105 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Projects" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide">
+    <div class="page-head">
+        <div>
+            <h1>{% trans "Projects" %}</h1>
+            <p class="lead">{% trans "Manage customer projects. Tasks from active projects feed the shared worker pool." %}</p>
+        </div>
+        <div class="page-actions-cluster">
+            <a class="btn" href="{% url 'project_create' %}">{% trans "New project" %}</a>
+            <a class="btn btn-secondary" href="{% url 'question_distribution' %}">{% trans "Distribution" %}</a>
+            <a class="btn btn-secondary" href="{% url 'dashboard' %}">{% trans "Back to Dashboard" %}</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="flash-wrap">
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if pending_deadline_count %}
+        <section class="card admin-deadline-requests-card">
+            <p class="hint">
+                {% blocktrans count count=pending_deadline_count %}
+                    {{ count }} project has a pending customer deadline change request.
+                {% plural %}
+                    {{ count }} projects have pending customer deadline change requests.
+                {% endblocktrans %}
+            </p>
+        </section>
+    {% endif %}
+
+    <section class="card">
+        <table class="scores projects-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Customer" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Active" %}</th>
+                    <th>{% trans "Tasks" %}</th>
+                    <th>{% trans "Gold" %}</th>
+                    <th>
+                        {% trans "Deadline" %}
+                        {% if request.GET.sort_deadline == "deadline_asc" %}
+                            <span class="muted-cell">↑</span>
+                        {% elif request.GET.sort_deadline == "deadline_desc" %}
+                            <span class="muted-cell">↓</span>
+                        {% endif %}
+                        <div class="projects-deadline-sort">
+                            <a href="?sort_deadline=deadline_asc">{% trans "Oldest" %}</a>
+                            /
+                            <a href="?sort_deadline=deadline_desc">{% trans "Newest" %}</a>
+                        </div>
+                    </th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for project in project_rows %}
+                    <tr{% if project.status == "pending" %} class="project-row-pending"{% endif %}>
+                        <td>{{ project.name }}</td>
+                        <td>{{ project.customer|default:"—" }}</td>
+                        <td>
+                            {% if project.status == "pending" %}
+                                <span class="project-status-pill project-status-pending">{% trans "Needs setup" %}</span>
+                            {% else %}
+                                <span class="project-status-pill project-status-active">{% trans "Active" %}</span>
+                            {% endif %}
+                            {% if project.deadline_request_status == "pending" %}
+                                <span class="project-status-pill project-status-deadline-req">{% trans "Deadline request" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>{% if project.is_active %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+                        <td>{{ project.task_count }}</td>
+                        <td>{{ project.gold_count }}</td>
+                        <td>
+                            {% if project.deadline %}
+                                {{ project.deadline|date:"d/m/Y" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="projects-actions">
+                            <a href="{% url 'analytics' %}?project={{ project.id }}">{% trans "Analytics" %}</a>
+                            <a href="{% url 'review_queue' %}?project={{ project.id }}">{% trans "Review queue" %}</a>
+                            <a href="{% url 'project_edit' project.id %}">{% trans "Edit" %}</a>
+                            <a href="{% url 'project_delete' project.id %}">{% trans "Delete" %}</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="8">{% trans "No projects yet." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+{% endblock %}

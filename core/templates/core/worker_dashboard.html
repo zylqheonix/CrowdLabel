@@ -1,0 +1,127 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Let's go" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide worker-page">
+{% block content %}
+    {% include "core/partials/streak_toast.html" %}
+
+    {% if new_badges %}
+        <div class="badge-toast" id="badge-toast">
+            <button class="toast-close" type="button" aria-label="{% trans 'Dismiss badge notification' %}">&times;</button>
+            <p class="toast-heading">{% trans "Achievement unlocked" %}</p>
+            {% for badge in new_badges %}
+                <p class="toast-item tier-{{ badge.tier|lower }}"><span class="toast-trophy" aria-hidden="true">🏆</span> {{ badge.label }} — {{ badge.tier }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <header class="page-action-row">
+        <div class="page-intro">
+            <h1>{% trans "Let's go" %}</h1>
+            <p class="lead">{% trans "Pick a difficulty and jump back in." %}</p>
+        </div>
+        <div class="page-actions">
+            <div class="page-actions-cluster">
+                <span class="streak-mini" tabindex="0">
+                    <span class="streak-mini-value" aria-label="{% blocktrans with count=streak.current_streak %}Daily streak {{ count }}{% endblocktrans %}">🔥 {{ streak.current_streak }}</span>
+                    <span class="streak-mini-tip" role="tooltip">
+                        {% trans "Daily streak" %}{% if streak.has_freeze %} · 🛡️ {% trans "Protection" %}{% endif %}
+                        <span class="streak-mini-tip-best">{% blocktrans with count=streak.longest_streak %}Best {{ count }}{% endblocktrans %}</span>
+                    </span>
+                </span>
+                <a class="btn btn-trophy-room" href="{% url 'trophy_room' %}">🏆 {% trans "Trophy Room" %}</a>
+                <a class="btn btn-secondary" href="{% url 'store' %}">{% trans "Store" %}</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="points-strip points-strip-dashboard">
+        <p class="points-balance">✦ {% blocktrans with balance=points.balance %}{{ balance }} points{% endblocktrans %}</p>
+    </div>
+
+    <section class="card points-leaderboard-card" aria-label="{% trans 'Points Leaderboard' %}">
+        <h2 class="card-title">{% trans "Points Leaderboard" %}</h2>
+        <table class="scores points-leaderboard-table">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Rank" %}</th>
+                    <th scope="col">{% trans "Worker" %}</th>
+                    <th scope="col">{% trans "Points" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in points_leaderboard.top %}
+                    <tr{% if row.is_current_user %} class="points-leaderboard-you"{% endif %}>
+                        <td class="rank">{{ row.rank }}</td>
+                        <td>{{ row.username }}</td>
+                        <td>{{ row.points }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if not points_leaderboard.in_top %}
+            <div class="points-leaderboard-divider" role="separator"></div>
+            <p class="points-leaderboard-pinned">
+                {% blocktrans with rank=points_leaderboard.current_user.rank points=points_leaderboard.current_user.points %}You — #{{ rank }} · {{ points }} points{% endblocktrans %}
+            </p>
+        {% endif %}
+    </section>
+
+    <div class="difficulty-grid">
+        {% for card in difficulty_cards %}
+            <form method="post" action="{% url 'worker_dashboard' %}" class="difficulty-card difficulty-{{ card.key }} {% if card.is_done %}difficulty-done{% endif %}">
+                {% csrf_token %}
+                <input type="hidden" name="difficulty" value="{{ card.key }}">
+                <div class="difficulty-card-band" aria-hidden="true"></div>
+                <div class="difficulty-card-body">
+                    <div class="difficulty-card-head">
+                        <h2>{{ card.label }}</h2>
+                        {% if card.is_done %}
+                            <span class="difficulty-status">{% trans "Complete" %}</span>
+                        {% endif %}
+                    </div>
+                    <p class="difficulty-desc">{{ card.description }}</p>
+                    <div class="difficulty-progress">
+                        <p class="difficulty-count">{% blocktrans with completed=card.completed total=card.total %}{{ completed }} / {{ total }} completed{% endblocktrans %}</p>
+                        <div class="progress-track">
+                            <div
+                                class="progress-fill"
+                                style="width: {{ card.percent }}%;"
+                                role="progressbar"
+                                aria-valuenow="{{ card.percent }}"
+                                aria-valuemin="0"
+                                aria-valuemax="100"
+                            ></div>
+                        </div>
+                    </div>
+                    {% if selected_difficulty == card.key %}
+                        <span class="difficulty-current">{% trans "Current selection" %}</span>
+                    {% endif %}
+                    <button class="btn btn-card-action" type="submit">
+                        {% if card.completed %}{% trans "Resume" %}{% else %}{% trans "Start" %}{% endif %} {{ card.label }}
+                    </button>
+                </div>
+            </form>
+        {% endfor %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            {% if new_badges %}
+                const toast = document.getElementById("badge-toast");
+                const close = toast ? toast.querySelector(".toast-close") : null;
+                if (close) {
+                    close.addEventListener("click", function () {
+                        toast.remove();
+                    });
+                }
+            {% endif %}
+
+        });
+    </script>
+{% endblock %}
+</main>
+{% endblock %}

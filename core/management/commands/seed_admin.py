@@ -5,6 +5,7 @@ from core.models import User
 # TODO: prototype only — change admin credentials before any real deployment
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
+ADMIN_EMAIL = "admin@example.com"
 
 
 class Command(BaseCommand):
@@ -12,6 +13,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if User.objects.filter(username=ADMIN_USERNAME).exists():
+            admin = User.objects.get(username=ADMIN_USERNAME)
+            if not admin.email:
+                admin.email = ADMIN_EMAIL
+                admin.save(update_fields=["email"])
             self.stdout.write(f"Admin user '{ADMIN_USERNAME}' already exists.")
             return
 
@@ -19,6 +24,7 @@ class Command(BaseCommand):
         User.objects.create_user(
             username=ADMIN_USERNAME,
             password=ADMIN_PASSWORD,
+            email=ADMIN_EMAIL,
             role=User.ADMIN,
         )
         self.stdout.write(

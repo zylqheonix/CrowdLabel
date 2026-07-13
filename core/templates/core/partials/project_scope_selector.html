@@ -1,0 +1,20 @@
+<form method="get" class="project-scope-form">
+    <label>Project
+        <select class="select" name="project">
+            {% for project in projects %}
+                <option value="{{ project.id }}" {% if selected_project == project.id|stringformat:"s" %}selected{% endif %}>
+                    {{ project.name }}{% if not project.is_active %} (inactive){% endif %}
+                </option>
+            {% endfor %}
+            <option value="all" {% if selected_project == "all" %}selected{% endif %}>All projects</option>
+        </select>
+    </label>
+    {% if preserve_query %}
+        {% for key, value in preserve_query.items %}
+            {% if key != "project" and key != "review_page" %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    <button class="btn btn-small" type="submit">Apply</button>
+</form>

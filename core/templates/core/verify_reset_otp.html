@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Verify reset code" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block content %}
+    <h1>{% trans "Check your email" %}</h1>
+    {% if generic_reset_copy %}
+        <p class="lead">
+            {% trans "If an account exists for that email, we sent a 6-digit code. Enter it below to continue resetting your password." %}
+        </p>
+    {% else %}
+        <p class="lead">
+            {% blocktrans with email=email_masked %}
+                We sent a 6-digit code to {{ email }}. Enter it below to continue resetting your password.
+            {% endblocktrans %}
+        </p>
+    {% endif %}
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if messages %}
+        <div class="flash-wrap">
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'verify_reset_otp' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="verify">
+        <label for="code">{% trans "Verification code" %}</label>
+        <input type="text" id="code" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required autofocus>
+
+        <button class="btn" type="submit">{% trans "Verify code" %}</button>
+    </form>
+
+    <form method="post" action="{% url 'verify_reset_otp' %}" class="otp-resend-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="resend">
+        <button class="btn btn-secondary" type="submit">{% trans "Resend code" %}</button>
+    </form>
+
+    <p class="alt-link"><a href="{% url 'forgot_password' %}">{% trans "Back" %}</a></p>
+{% endblock %}

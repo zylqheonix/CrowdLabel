@@ -1,0 +1,15 @@
+{% if bars %}
+<div class="analytics-bars{% if bars_class %} {{ bars_class }}{% endif %}" role="img" aria-label="{{ chart_label }}">
+    {% for bar in bars %}
+        <div class="analytics-bar-col" style="--bar-pct: {{ bar.pct }};">
+            <span class="analytics-bar-value">{{ bar.count }}</span>
+            <div class="analytics-bar-track" aria-hidden="true">
+                <span class="analytics-bar-fill"></span>
+            </div>
+            <span class="analytics-bar-label"{% if bar.title %} title="{{ bar.title }}"{% endif %}>{{ bar.label }}</span>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="hint">No data for this selection.</p>
+{% endif %}

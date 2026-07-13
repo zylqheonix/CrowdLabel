@@ -1,9 +1,10 @@
 {% extends "core/base.html" %}
+{% load i18n %}
 
-{% block title %}Log In · CrowdLabel{% endblock %}
+{% block title %}{% trans "Log In" %} · {% trans "CrowdLabel" %}{% endblock %}
 
 {% block content %}
-    <h1>Log In</h1>
+    <h1>{% trans "Log In" %}</h1>
 
     {% if error %}
         <p class="error">{{ error }}</p>
@@ -11,14 +12,15 @@
 
     <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
-        <label for="username">Username</label>
+        <label for="username">{% trans "Username" %}</label>
         <input type="text" id="username" name="username" autofocus>
 
-        <label for="password">Password</label>
+        <label for="password">{% trans "Password" %}</label>
         <input type="password" id="password" name="password">
 
-        <button class="btn" type="submit">Log In</button>
+        <button class="btn" type="submit">{% trans "Log In" %}</button>
     </form>
 
-    <p class="alt-link">No account yet? <a href="{% url 'register' %}">Register</a></p>
+    <p class="alt-link"><a href="{% url 'forgot_password' %}">{% trans "Forgot password?" %}</a></p>
+    <p class="alt-link">{% trans "No account yet?" %} <a href="{% url 'register' %}">{% trans "Register" %}</a></p>
 {% endblock %}

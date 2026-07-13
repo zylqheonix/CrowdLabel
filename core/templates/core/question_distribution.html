@@ -1,0 +1,185 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Question Distribution" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide">
+    <div class="page-head">
+        <div>
+            <h1>{% trans "Question Distribution" %}</h1>
+            <p class="lead">{% trans "Control what share of served non-gold questions each active project receives." %}</p>
+        </div>
+        <div class="page-actions-cluster">
+            <a class="btn btn-secondary" href="{% url 'projects' %}">{% trans "Projects" %}</a>
+            <a class="btn btn-secondary" href="{% url 'dashboard' %}">{% trans "Back to Dashboard" %}</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="flash-wrap">
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="card distribution-mode-card">
+        <h2 class="card-title">{% trans "Distribution mode" %}</h2>
+        <form method="post" class="distribution-mode-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="mode">
+            <div class="distribution-mode-options">
+                <label class="distribution-mode-option{% if is_manual %} is-active{% endif %}">
+                    <input type="radio" name="distribution_mode" value="manual"{% if is_manual %} checked{% endif %}>
+                    <span class="distribution-mode-label">{% trans "Manual" %}</span>
+                    <span class="distribution-mode-hint">{% trans "Set relative integer weights per project." %}</span>
+                </label>
+                <label class="distribution-mode-option{% if is_auto %} is-active{% endif %}">
+                    <input type="radio" name="distribution_mode" value="auto"{% if is_auto %} checked{% endif %}>
+                    <span class="distribution-mode-label">{% trans "Auto" %}</span>
+                    <span class="distribution-mode-hint">{% trans "Weights derived from deadline urgency and remaining coverage." %}</span>
+                </label>
+            </div>
+            <button type="submit" class="btn">{% trans "Apply mode" %}</button>
+        </form>
+    </section>
+
+    <section class="card distribution-panel{% if not is_manual %} distribution-panel--inactive{% endif %}">
+        <h2 class="card-title">{% trans "Manual weights" %}</h2>
+        {% if not is_manual %}
+            <p class="distribution-inactive-note">{% trans "Inactive while auto mode is on." %}</p>
+        {% endif %}
+        {% if is_manual and manual_weights_relative %}
+            <p class="distribution-warning">
+                {% blocktrans with total=manual_weight_sum %}Weights sum to {{ total }} — treated as relative, not required to equal 100.{% endblocktrans %}
+            </p>
+        {% endif %}
+
+        <form method="post" class="distribution-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="manual">
+            <table class="scores distribution-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Project" %}</th>
+                        <th>{% trans "Weight" %}</th>
+                        <th>{% trans "Serving %" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in project_rows %}
+                        <tr>
+                            <td>{{ row.project.name }}</td>
+                            <td>
+                                <input
+                                    class="input distribution-input"
+                                    type="number"
+                                    name="weight_{{ row.project.id }}"
+                                    value="{{ row.project.serving_weight }}"
+                                    min="0"
+                                    step="1"
+                                    {% if not is_manual %}disabled{% endif %}
+                                >
+                            </td>
+                            <td>
+                                {% if row.normalized_pct is not None %}
+                                    {{ row.normalized_pct }}%
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="muted-cell">{% trans "No active projects." %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if is_manual and project_rows %}
+                <button type="submit" class="btn">{% trans "Save manual weights" %}</button>
+            {% endif %}
+        </form>
+    </section>
+
+    <section class="card distribution-panel{% if not is_auto %} distribution-panel--inactive{% endif %}">
+        <h2 class="card-title">{% trans "Auto weights" %}</h2>
+        {% if not is_auto %}
+            <p class="distribution-inactive-note">{% trans "Inactive while manual mode is on." %}</p>
+        {% else %}
+            <p class="distribution-auto-note">
+                {% trans "Boosts scale the auto weight — they do not set a fixed percentage. The % shifts as deadlines and coverage change." %}
+            </p>
+        {% endif %}
+
+        <form method="post" class="distribution-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="auto">
+            <table class="scores distribution-table distribution-table--auto">
+                <thead>
+                    <tr>
+                        <th>{% trans "Project" %}</th>
+                        <th>{% trans "Deadline" %}</th>
+                        <th>{% trans "Days left" %}</th>
+                        <th>{% trans "Remaining" %}</th>
+                        <th>{% trans "Throughput" %}</th>
+                        <th>{% trans "Boost" %}</th>
+                        <th>{% trans "Final weight" %}</th>
+                        <th>{% trans "Serving %" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in project_rows %}
+                        <tr>
+                            <td>{{ row.project.name }}</td>
+                            <td>
+                                {% if row.project.deadline %}
+                                    {{ row.project.deadline|date:"d/m/Y" }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if row.days_left is not None %}
+                                    {{ row.days_left }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>{{ row.remaining }}</td>
+                            <td class="distribution-readonly">{{ row.throughput|floatformat:2 }}</td>
+                            <td>
+                                <input
+                                    class="input distribution-input"
+                                    type="number"
+                                    name="boost_{{ row.project.id }}"
+                                    value="{{ row.project.serving_boost }}"
+                                    min="0"
+                                    step="0.1"
+                                    {% if not is_auto %}disabled{% endif %}
+                                >
+                            </td>
+                            <td class="distribution-readonly">{{ row.final_auto_weight|floatformat:2 }}</td>
+                            <td>
+                                {% if row.normalized_pct is not None %}
+                                    {{ row.normalized_pct }}%
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="muted-cell">{% trans "No active projects." %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if is_auto and project_rows %}
+                <button type="submit" class="btn">{% trans "Save boosts" %}</button>
+            {% endif %}
+        </form>
+    </section>
+</main>
+{% endblock %}

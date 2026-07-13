@@ -1,0 +1,137 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}Resolve · {{ task_obj.task_id }} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide">
+    <div class="page-head">
+        <div>
+            <h1>{% trans "Resolve Review Item" %}</h1>
+            <p class="lead">{% blocktrans with task_id=task_obj.task_id %}Task {{ task_id }}{% endblocktrans %}</p>
+        </div>
+        <a class="btn btn-secondary" href="{{ back_url }}">{% trans "Back to Review Queue" %}</a>
+    </div>
+
+    <section class="card">
+        <h2 class="card-title">{% trans "Question" %}</h2>
+        {% if task_obj.image %}
+            <img class="task-image" src="{{ task_obj.image }}" alt="{% trans 'Task image' %}">
+        {% endif %}
+        <p class="question-text">{{ task_obj.task }}</p>
+
+        <fieldset class="options" disabled>
+            {% for key, label in resolve_data.choice_map.items %}
+                <label class="option{% if resolve_data.ground_truth and key == resolve_data.ground_truth and reveal_truth %} option-correct{% endif %}">
+                    <input type="radio" disabled {% if reveal_truth and key == resolve_data.ground_truth %}checked{% endif %}>
+                    <span><strong>{{ key }}.</strong> {{ label }}</span>
+                </label>
+            {% endfor %}
+        </fieldset>
+    </section>
+
+    <section class="card">
+        <h2 class="card-title">{% trans "Crowd Stats" %}</h2>
+        <div class="review-summary">
+            <p><strong>{% trans "Coverage" %}:</strong> {{ resolve_data.coverage }}</p>
+            <p><strong>{% trans "Majority" %}:</strong> {{ resolve_data.majority }}</p>
+            <p><strong>{% trans "Agreement" %}:</strong> {% if resolve_data.agreement_pct is None %}—{% else %}{{ resolve_data.agreement_pct }}%{% endif %}</p>
+        </div>
+        <table class="scores">
+            <thead>
+                <tr>
+                    <th>{% trans "Choice" %}</th>
+                    <th>{% trans "Count" %}</th>
+                    <th>{% trans "Percent" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in resolve_data.crowd_rows %}
+                    <tr>
+                        <td>{{ row.key }} — {{ row.label }}</td>
+                        <td>{{ row.count }}</td>
+                        <td>{{ row.pct }}%</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="3">{% trans "No crowd answers yet." %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    {% if not task_obj.is_goldtask %}
+        <section class="card">
+            <h2 class="card-title">{% trans "LLM Stats" %}</h2>
+            {% if resolve_data.llm_stats %}
+                <p><strong>{% trans "LLM answer" %}:</strong> {{ resolve_data.llm_stats.answer_key }} — {{ resolve_data.llm_stats.answer_label }}</p>
+                <p><strong>{% trans "Confidence (from probs)" %}:</strong> {{ resolve_data.llm_stats.confidence|default:"—" }}</p>
+                {% if resolve_data.llm_stats.probs %}
+                    <table class="scores">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Choice" %}</th>
+                                <th>{% trans "Probability" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, prob in resolve_data.llm_stats.probs.items %}
+                                <tr>
+                                    <td>{{ key }}</td>
+                                    <td>{{ prob }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            {% else %}
+                <p class="hint">{% trans "No LLM data found for this task." %}</p>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    <section class="card">
+        <h2 class="card-title">{% trans "Ground Truth" %}</h2>
+        {% if task_obj.is_goldtask %}
+            <p><strong>{% trans "Correct answer" %}:</strong> {{ resolve_data.ground_truth|default:"—" }}</p>
+        {% else %}
+            {% if reveal_truth %}
+                <p><strong>{% trans "Submitted answer" %}:</strong> {{ resolve_data.ground_truth|default:"—" }}</p>
+            {% else %}
+                <p class="hint">{% trans "Hidden until revealed." %}</p>
+                <a class="btn btn-secondary" href="?reveal_truth=1">{% trans "Reveal ground truth" %}</a>
+            {% endif %}
+        {% endif %}
+    </section>
+
+    {% if not task_obj.is_goldtask %}
+        <section class="card">
+            <h2 class="card-title">{% trans "Admin Answer" %}</h2>
+            {% if local_feedback %}
+                <p class="hint">{{ local_feedback }}</p>
+            {% endif %}
+            {% if current_resolution.answer %}
+                <div class="review-summary">
+                    <p><strong>{% trans "Current resolution" %}:</strong> {{ current_resolution.answer }} — {{ current_resolution.label }}</p>
+                    <p><strong>{% trans "Resolved by" %}:</strong> {{ current_resolution.resolved_by|default:"—" }}</p>
+                    <p><strong>{% trans "Resolved at" %}:</strong> {{ current_resolution.resolved_at|date:"d/m/Y H:i"|default:"—" }}</p>
+                </div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <fieldset class="options">
+                    {% for key, label in resolve_data.choice_map.items %}
+                        <label class="option">
+                            <input type="radio" name="admin_answer" value="{{ key }}" {% if selected_admin_answer == key %}checked{% endif %}>
+                            <span><strong>{{ key }}.</strong> {{ label }}</span>
+                        </label>
+                    {% endfor %}
+                </fieldset>
+                <button class="btn" type="submit" name="action" value="save">{% trans "Save resolution" %}</button>
+                {% if current_resolution.answer %}
+                    <button class="btn btn-secondary" type="submit" name="action" value="clear">{% trans "Clear resolution" %}</button>
+                {% endif %}
+            </form>
+        </section>
+    {% endif %}
+</main>
+{% endblock %}

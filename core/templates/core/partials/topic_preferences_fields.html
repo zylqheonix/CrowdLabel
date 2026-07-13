@@ -1,0 +1,18 @@
+{% load i18n %}
+<p class="hint preferences-hint">{% trans "Leave all unchecked to get every topic." %}</p>
+{% if available_topics %}
+    <div class="topic-actions">
+        <button class="btn btn-small btn-secondary topic-select-all" type="button">{% trans "Select all" %}</button>
+        <button class="btn btn-small btn-secondary topic-clear-all" type="button">{% trans "Clear" %}</button>
+    </div>
+    <div class="topic-checkbox-grid">
+        {% for tag in available_topics %}
+            <label class="topic-checkbox">
+                <input type="checkbox" name="preferred_topics" value="{{ tag }}"{% if tag in selected_topics %} checked{% endif %}>
+                <span>{{ tag }}</span>
+            </label>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="history-empty">{% trans "No topics in the task pool yet." %}</p>
+{% endif %}

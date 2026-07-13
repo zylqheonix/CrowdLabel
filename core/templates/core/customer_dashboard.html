@@ -1,0 +1,96 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "My Projects" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block layout %}
+<main class="shell shell-wide">
+    <div class="page-head">
+        <div>
+            <h1>{% trans "My Projects" %}</h1>
+            <p class="lead">{% trans "Track progress on your labeling projects. Upload new projects for admin activation." %}</p>
+        </div>
+        <div class="page-actions-cluster">
+            <a class="btn" href="{% url 'customer_upload' %}">{% trans "Upload project" %}</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="flash-wrap">
+            {% for message in messages %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if newly_activated_projects %}
+        <section class="card">
+            <h2 class="card-title">{% trans "Project updates" %}</h2>
+            <p class="hint">
+                {% blocktrans count count=newly_activated_projects|length %}
+                    {{ count }} project was activated by admin and is now live for workers.
+                {% plural %}
+                    {{ count }} projects were activated by admin and are now live for workers.
+                {% endblocktrans %}
+            </p>
+            <ul>
+                {% for project in newly_activated_projects %}
+                    <li><a href="{% url 'customer_project_detail' project.id %}">{{ project.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
+
+    <section class="card">
+        <table class="scores projects-table">
+            <thead>
+                <tr>
+                    <th>{% trans "Project" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Deadline" %}</th>
+                    <th>{% trans "Progress" %}</th>
+                    <th>{% trans "Tasks answered" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in project_rows %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'customer_project_detail' row.project.id %}">{{ row.project.name }}</a>
+                        </td>
+                        <td>
+                            {% if row.project.is_complete %}
+                                <span class="project-status-pill project-status-active">{% trans "Complete" %}</span>
+                            {% elif row.project.status == "pending" %}
+                                <span class="project-status-pill project-status-pending">{% trans "Pending review" %}</span>
+                            {% else %}
+                                <span class="project-status-pill project-status-active">{% trans "Active" %}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.project.deadline %}
+                                {{ row.project.deadline|date:"d/m/Y" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="project-progress-wrap">
+                                <div class="project-progress-track">
+                                    <span class="project-progress-fill" style="width: {{ row.progress.progress_pct }}%"></span>
+                                </div>
+                                <span class="project-progress-pct">{{ row.progress.progress_pct }}%</span>
+                            </div>
+                        </td>
+                        <td>{{ row.progress.answered }} / {{ row.progress.total }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="muted-cell">{% trans "No projects yet." %} <a href="{% url 'customer_upload' %}">{% trans "Upload your first project" %}</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+{% endblock %}

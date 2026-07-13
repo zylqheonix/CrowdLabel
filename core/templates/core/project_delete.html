@@ -1,0 +1,20 @@
+{% extends "core/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete project" %} · {% trans "CrowdLabel" %}{% endblock %}
+
+{% block content %}
+    <h1>{% trans "Delete project" %}</h1>
+    <p class="lead">{% blocktrans with name=project.name %}Delete {{ name }}?{% endblocktrans %}</p>
+
+    {% if has_tasks %}
+        <p class="error">{% trans "This project still has tasks and cannot be deleted." %}</p>
+    {% else %}
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn" type="submit">{% trans "Confirm delete" %}</button>
+        </form>
+    {% endif %}
+
+    <p class="alt-link"><a href="{% url 'projects' %}">{% trans "Back to projects" %}</a></p>
+{% endblock %}
