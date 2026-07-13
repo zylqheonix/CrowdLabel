@@ -118,6 +118,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "anymail",
     "core",
 ]
 
@@ -296,3 +297,36 @@ EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "").strip()
 EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "").strip()
 EMAIL_USE_TLS = _env_bool("DJANGO_EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = _env_bool("DJANGO_EMAIL_USE_SSL", default=False)
+
+# Alternative to raw SMTP: set DJANGO_EMAIL_BACKEND=anymail.backends.resend.EmailBackend
+# to send over Resend's HTTPS API instead. Needed on hosts (e.g. Render) that block
+# outbound SMTP — the SMTP settings above are simply unused when this backend is active.
+ANYMAIL = {
+    "RESEND_API_KEY": os.environ.get("RESEND_API_KEY", "").strip(),
+}
+
+# Django's default logging silently drops unhandled request exceptions when
+# DEBUG=False (no console output, no email unless ADMINS is configured) — so
+# 500s are otherwise invisible on a host with no other log aggregation. Force
+# them to stderr, which platforms like Render capture in their log stream.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
