@@ -1,6 +1,7 @@
 """Email OTP helpers for login 2FA and worker password recovery."""
 
 import hashlib
+import logging
 import secrets
 
 from django.conf import settings
@@ -9,6 +10,8 @@ from django.utils import timezone
 from django.utils.translation import gettext
 
 from .models import EmailOTP, User
+
+logger = logging.getLogger(__name__)
 
 OTP_LENGTH = 6
 OTP_TTL_MINUTES = 10
@@ -68,13 +71,24 @@ def create_and_send_otp(user, purpose):
         code_hash=_hash_code(code),
         expires_at=expires_at,
     )
-    send_mail(
-        subject=str(_otp_email_subject(purpose)),
-        message=_otp_email_body(code, purpose),
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email],
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            subject=str(_otp_email_subject(purpose)),
+            message=_otp_email_body(code, purpose),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except Exception:
+        # Log the real reason (e.g. the ESP's rejection message) before the
+        # caller catches this and shows the user a generic failure message.
+        logger.exception(
+            "OTP email send failed (purpose=%s, backend=%s, from=%s)",
+            purpose,
+            settings.EMAIL_BACKEND,
+            settings.DEFAULT_FROM_EMAIL,
+        )
+        raise
     return code
 
 

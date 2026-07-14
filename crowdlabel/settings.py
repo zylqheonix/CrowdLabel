@@ -317,6 +317,11 @@ LOGGING = {
             "class": "logging.StreamHandler",
         },
     },
+    # Root handler so application loggers (core.*) also reach stderr.
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
     "loggers": {
         "django": {
             "handlers": ["console"],
