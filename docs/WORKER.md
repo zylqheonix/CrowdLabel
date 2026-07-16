@@ -36,7 +36,7 @@ For platform setup and admin tools, see [ADMIN.md](ADMIN.md). For architecture a
 4. Submit → a 6-digit verification code is emailed to you and you land on `/register/verify-worker`
 5. Enter the code (10-minute expiry; **Resend** available on a cooldown) → account is marked verified and you are sent to **onboarding** (`/setup/`)
 
-In dev without SMTP configured, the code prints to the server console instead of arriving by email.
+In development, the code prints to the `runserver` console instead of arriving by email.
 
 Invite links (`/register?invite=<token>`) still work for workers; the invite is accepted on successful registration.
 

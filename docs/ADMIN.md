@@ -20,7 +20,8 @@ Worker-facing features are documented in [WORKER.md](WORKER.md). Shared architec
 10. [Project deadlines](#project-deadlines)
 11. [Rate limiting](#rate-limiting)
 12. [Handover & customization](#handover--customization)
-13. [Production checklist](#production-checklist)
+13. [Pilot checklist](#pilot-checklist)
+14. [What's not built yet](#whats-not-built-yet)
 
 ---
 
@@ -40,7 +41,7 @@ Default prototype credentials:
 |----------|----------|-------|------|
 | `admin` | `admin123` | `admin@example.com` | admin |
 
-Running `seed_admin` again is safe — if the user already exists it backfills a missing email and leaves everything else untouched. Change the username/password/email before any real deployment (`core/management/commands/seed_admin.py`).
+Running `seed_admin` again is safe — if the user already exists it backfills a missing email and leaves everything else untouched. Change the username/password/email before sharing the app (`core/management/commands/seed_admin.py`).
 
 ### Log in
 
@@ -250,7 +251,7 @@ Filter/sort updates partial content without full page reload.
 
 ### Not included yet
 
-**AI Analytics** — placeholder in template; `llm_info` exists in sample data but no admin charts yet.
+> **⚠️ AI / LLM analytics are not built yet.** The analytics page shows an **"AI Analytics"** placeholder, and the sample data carries model metadata (`llm_info` — model answer + confidence), but there are **no LLM-driven charts, scoring, or model-vs-crowd comparisons** in the app. See [DOCUMENTATION.md — Future work & roadmap](../DOCUMENTATION.md#future-work--roadmap) for where a developer would add this.
 
 ---
 
@@ -332,7 +333,7 @@ Dashboard shows deadline alert banner for urgent projects only.
 
 ## Rate limiting
 
-Admin-facing write/AJAX endpoints are throttled per IP (and per user where authenticated), backed by `core/ratelimit.py` and the `CACHES["default"]` backend (LocMem in dev — switch to Redis/Memcached if running multiple app workers, so limits apply across processes):
+Admin-facing write/AJAX endpoints are throttled per IP (and per user where authenticated), backed by `core/ratelimit.py`:
 
 | Action | Default limit |
 |--------|----------------|
@@ -348,7 +349,22 @@ CSV imports are also capped by size/row count regardless of rate limit: `CSV_UPL
 
 ## Handover & customization
 
-After handover, operators tune behavior by editing Python modules and settings — there is **no admin UI** for most gamification knobs today.
+After handover, operators tune behavior by editing Python modules and settings — there is **no admin UI** for most gamification knobs today. After any change, restart the server.
+
+**Quick "where do I change…?" index:**
+
+| I want to change… | Edit | File |
+|-------------------|------|------|
+| **The shop / store items & prices** | `STORE_BADGES` | `core/store.py` |
+| Achievement badges & tiers | `BADGES` | `core/badges.py` |
+| How many points tasks award | `COMPLETION_POINTS`, `DIFFICULTY_POINTS`, referral rewards | `core/points.py` |
+| Reputation gains/losses | `STARTING_REPUTATION`, `REPUTATION_GAIN/LOSS` | `core/reputation.py` |
+| Daily-streak rules | `STREAK_FREEZE_THRESHOLD` | `core/streaks.py` |
+| Review-queue / analytics thresholds | `REVIEW_*`, `ANALYTICS_*`, `TARGET_COVERAGE` | `crowdlabel/settings.py` |
+| UI copy / translations | `{% trans %}` strings + `.po` files | templates, `locale/ar/` |
+| Colors / theme | CSS tokens | `core/static/core/style.css` |
+
+Each is detailed below.
 
 ### 1. Achievement badges (`core/badges.py`)
 
@@ -440,29 +456,11 @@ SHOW_ANSWER_TIMER = True
 
 Restart the server after changing settings.
 
-### 6a. Rate limits & email delivery (`.env`)
+### 6a. Rate limits & email (`.env`)
 
-Everything below has a safe dev-mode default (console email backend, generous rate limits, in-process cache) and is overridden per-deployment via `.env` — see `.env.example` for the full annotated list:
+Rate-limit scopes and email delivery are env vars with safe dev defaults — override any scope with `RATE_LIMIT_<SCOPE>` (e.g. `RATE_LIMIT_LOGIN_IP=30`). See [`.env.example`](../.env.example) for the annotated list.
 
-```env
-# OTP delivery — switch from console to SMTP for real inboxes
-DJANGO_EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-DJANGO_DEFAULT_FROM_EMAIL=CrowdLabel <noreply@yourdept.edu>
-DJANGO_EMAIL_HOST=smtp.your-provider.com
-DJANGO_EMAIL_PORT=587
-DJANGO_EMAIL_HOST_USER=your-user
-DJANGO_EMAIL_HOST_PASSWORD=your-password
-
-# Rate limits — override any scope, e.g. to loosen login attempts for a pilot
-RATE_LIMIT_LOGIN_IP=30
-RATE_LIMIT_CSV_UPLOAD=5
-
-# Shared cache across multiple app workers (required for rate limits to be effective)
-DJANGO_CACHE_BACKEND=django.core.cache.backends.redis.RedisCache
-DJANGO_CACHE_LOCATION=redis://127.0.0.1:6379/1
-```
-
-Without SMTP configured, admin/customer login OTP codes and worker signup/reset codes only appear in the server console — fine for a pilot on one machine, not for a real multi-admin deployment.
+**In development, OTP codes print to the `runserver` console** (console email backend) — no mail server needed. Configuring real inbox delivery is an environment/hosting concern and is out of scope for this guide.
 
 ### 7. Translations (badges, labels, UI copy)
 
@@ -491,9 +489,11 @@ Theme toggle stores preference in `localStorage` (`data-theme` on `<html>`).
 
 | Item | Location |
 |------|----------|
-| Seed admin | `python manage.py seed_admin` |
-| `SECRET_KEY` | `crowdlabel/settings.py` — replace for production |
-| `DEBUG`, `ALLOWED_HOSTS` | `crowdlabel/settings.py` |
+| Seed / re-seed admin | `python manage.py seed_admin` |
+| Change admin password | Django shell, or via `/admin/` if the admin is a superuser |
+| `SECRET_KEY`, `DEBUG` | env vars (`DJANGO_SECRET_KEY`, `DJANGO_DEBUG`) — see `.env.example` |
+
+Django's admin site (`/admin/`) is a useful management surface once the admin account is a superuser — it can create pre-verified accounts, reset passwords, and delete bad signups without a shell.
 
 ### 10. Database migrations
 
@@ -517,18 +517,19 @@ Upload via `/upload-tasks` or use customer upload format for customer testing.
 
 ---
 
-## Production checklist
+## Pilot checklist
 
-- [ ] Change `DJANGO_SECRET_KEY`, set `DJANGO_DEBUG=False`, restrict `DJANGO_ALLOWED_HOSTS` (`.env`)
-- [ ] Change admin username/password/email (`seed_admin` or Django shell); admin has no self-service password reset
-- [ ] Set `DJANGO_CSRF_TRUSTED_ORIGINS` if serving over a custom domain
-- [ ] Configure real SMTP delivery (`DJANGO_EMAIL_*`) — without it, OTP codes only reach the server console
-- [ ] Point `DJANGO_CACHE_BACKEND`/`DJANGO_CACHE_LOCATION` at Redis/Memcached if running more than one app worker (rate limits are cache-backed)
-- [ ] Consider PostgreSQL instead of SQLite (`DATABASE_URL`)
+App-level preparation before running the platform with real workers/customers (hosting/deployment is out of scope for this guide):
+
+- [ ] Change the admin username/password/email (`seed_admin` or Django shell); admins have no self-service password reset
 - [ ] Review Arabic translations (`locale/ar/`)
-- [ ] Tune badges, points, thresholds, and rate limits for your pilot
-- [ ] Document customer CSV format for your clients
-- [ ] Process: customer upload → admin review → activate → monitor review queue
+- [ ] Tune badges, points, streaks, reputation, and review thresholds for your pilot (see [Handover & customization](#handover--customization))
+- [ ] Document the customer CSV format for your clients
+- [ ] Walk the end-to-end process once: customer upload → admin review → activate → monitor review queue
+
+## What's not built yet
+
+See [DOCUMENTATION.md — Future work & roadmap](../DOCUMENTATION.md#future-work--roadmap). Most notably, **AI / LLM analytics are not implemented** — the "AI Analytics" area is a placeholder only.
 
 ---
 

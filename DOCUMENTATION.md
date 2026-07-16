@@ -310,21 +310,17 @@ Secrets and environment-specific values load from `.env` (see `.env.example`); e
 
 ### Environment-driven settings (`DJANGO_*` env vars, see `.env.example`)
 
+The app-relevant knobs. (Additional HTTPS/cookie-hardening variables exist in `settings.py` for when the app is served over TLS — see `.env.example` — but they are not needed for local development.)
+
 | Setting | Env var | Default | Purpose |
 |---------|---------|---------|---------|
 | `DEBUG` | `DJANGO_DEBUG` | `True` | Dev vs. production mode |
-| `SECRET_KEY` | `DJANGO_SECRET_KEY` | dev-only fallback (required when `DEBUG=False`) | Django signing key, also used to hash OTP codes |
-| `ALLOWED_HOSTS` | `DJANGO_ALLOWED_HOSTS` | localhost only | Host header validation |
-| `CSRF_TRUSTED_ORIGINS` | `DJANGO_CSRF_TRUSTED_ORIGINS` | empty | CSRF-trusted origins behind a proxy/custom domain |
-| `SECURE_HTTPS` (bundle: SSL redirect, HSTS, secure cookies) | `DJANGO_SECURE_HTTPS`, `DJANGO_SECURE_SSL_REDIRECT`, `DJANGO_SECURE_HSTS_SECONDS`, `DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS`, `DJANGO_SECURE_HSTS_PRELOAD` | on when `DEBUG=False` | HTTPS hardening |
-| `SECURE_PROXY_SSL_HEADER` | `DJANGO_USE_PROXY_SSL_HEADER` | matches `SECURE_HTTPS` | Trust `X-Forwarded-Proto` behind a reverse proxy |
-| `SECURE_REFERRER_POLICY` | `DJANGO_SECURE_REFERRER_POLICY` | `same-origin` | Referrer header policy |
-| `SESSION_COOKIE_SAMESITE` / `CSRF_COOKIE_SAMESITE` | `DJANGO_SESSION_COOKIE_SAMESITE`, `DJANGO_CSRF_COOKIE_SAMESITE` | `Lax` | Cookie SameSite policy |
+| `SECRET_KEY` | `DJANGO_SECRET_KEY` | dev-only fallback | Django signing key, also used to hash OTP codes |
 | `DATABASES` | `DATABASE_URL`, `DJANGO_DB_CONN_MAX_AGE` | empty → local SQLite | Postgres via `dj_database_url` when set |
-| `CSV_UPLOAD_MAX_BYTES` / `CSV_UPLOAD_MAX_ROWS` / `CSV_CHOICES_MAX_BYTES` | same names | 2,621,440 / 10,000 / 8,192 | CSV import caps (`core/csv_import.py`); also mirrored into `DATA_UPLOAD_MAX_MEMORY_SIZE` / `FILE_UPLOAD_MAX_MEMORY_SIZE` |
-| `CACHES["default"]` | `DJANGO_CACHE_BACKEND`, `DJANGO_CACHE_LOCATION` | LocMem | Rate-limit counters — use Redis/Memcached across multiple app workers |
+| `CSV_UPLOAD_MAX_BYTES` / `CSV_UPLOAD_MAX_ROWS` / `CSV_CHOICES_MAX_BYTES` | same names | 2,621,440 / 10,000 / 8,192 | CSV import caps (`core/csv_import.py`) |
+| `CACHES["default"]` | `DJANGO_CACHE_BACKEND`, `DJANGO_CACHE_LOCATION` | LocMem | Backing store for rate-limit counters |
 | `RATE_LIMITS` | `RATE_LIMIT_*` (one per scope) | see [Auth & verification](#auth--verification) | Per-scope request throttling |
-| `EMAIL_BACKEND`, `DEFAULT_FROM_EMAIL`, `EMAIL_HOST*`, `EMAIL_USE_TLS`/`EMAIL_USE_SSL` | `DJANGO_EMAIL_*` | console backend in dev | OTP email delivery |
+| `EMAIL_BACKEND`, `DEFAULT_FROM_EMAIL`, `EMAIL_HOST*` | `DJANGO_EMAIL_*` | console backend in dev | OTP email delivery |
 
 ---
 
@@ -379,16 +375,40 @@ python manage.py test core.tests
 
 ---
 
+## Future work & roadmap
+
+Things that are **not built yet**, and where a future developer would start.
+
+### AI / LLM analytics — not implemented
+
+The single biggest gap. The sample data (`sample_data/tasks_table.csv`) already carries per-task model metadata in an `llm_info` column (model answer + confidence probabilities), and the admin analytics template has a placeholder **"AI Analytics"** area — but **no LLM-driven charts, scoring, or model-vs-crowd comparison exist in the Django app today.** Nothing calls an LLM at runtime.
+
+Where to start:
+- The standalone Streamlit sandbox (`app.py`) already prototypes what's *possible* from this metadata (model confidence vs. crowd accuracy, disagreement, etc.) — a good reference for which charts to port into the admin analytics page.
+- `core/analytics.py` builds the admin analytics context; new AI charts would be added there and surfaced in `templates/core/analytics.html`.
+- `Task.correct_answer` / `WorkerAnswer` already give the crowd side of any model-vs-crowd comparison.
+
+### Other suggested next steps
+
+- **Registration hygiene** — a failed OTP send at signup currently leaves an unverified user row (email gets claimed even though verification never completed). Consider deleting the user on send failure, or letting a re-registration reclaim an unverified account.
+- **Admin password recovery** — admins have no self-service reset by design; a future admin-initiated reset (or making a second admin) would remove the reliance on `seed_admin`/shell.
+- **Bulk worker onboarding** — for closed pilots, a management command that creates pre-verified worker accounts from a list would beat manual Django-admin entry.
+- **Move gamification knobs into the admin UI** — badges, store items, and points rules are Python config today (see customization below); a future admin screen could make them editable without code.
+
+**Customizing existing behavior** (badges, points store, points, streaks, reputation, review thresholds) does **not** require new development — it's config editing, fully documented in **[docs/ADMIN.md — Handover & customization](docs/ADMIN.md#handover--customization)**.
+
+---
+
 ## Related files
 
 | Path | Purpose |
 |------|---------|
 | `README.md` | Short quick start |
-| `app.py` | Streamlit research dashboard (separate from Django app) — reads `sample_data/*.csv` directly, no dependency on the Django app |
+| `app.py` | Streamlit research sandbox (separate from Django app) — reads `sample_data/*.csv` directly; prototypes possible LLM/analytics visuals, no dependency on the Django app |
 | `manage.py` | Django CLI |
 | `core/management/commands/seed_admin.py` | Create admin user (username `admin`, email `admin@example.com`) |
 | `locale/ar/` | Arabic translations |
 | `.env.example` | Template for local `.env`; documents every environment variable above |
 | `core/tests/` | Automated test suite (`python manage.py test core.tests`) |
 
-*Last updated: reflects email verification (OTP) at signup, login 2FA for admin/customer, worker & customer password reset, rate limiting, and environment-driven security settings.*
+*Last updated: reflects email verification (OTP) at signup, login 2FA for admin/customer, worker & customer password reset, and rate limiting. AI/LLM analytics are not yet implemented (see Future work & roadmap).*
